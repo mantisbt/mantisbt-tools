@@ -87,11 +87,7 @@
 					fwrite( $fp, $lang_strings[$key]."\n" );
 				# else use the english string
 				} else {
-					if ( '?>' == $p_english_string ) {
-						fwrite( $fp, $english_string );
-					} else {
-						fwrite( $fp, $english_string."\n" );
-					}
+					fwrite( $fp, $english_string."\n" );
 				}
 			}
 		}

@@ -1,4 +1,4 @@
-# /usr/bin/env python
+#!/usr/bin/env python
 
 # This file checkes the filename lengths of all files in a directory.
 # Any files over 32 characters in length must be shortened.

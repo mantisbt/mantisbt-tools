@@ -145,11 +145,12 @@ replacement_table = {
 
 		"$g_reopen_bug_threshold"	: "$g_reopen_bug_threshold = DEVELOPER;",
 		"$g_quick_proceed "			: "$g_quick_proceed        = ON;",
-		"$g_login_method"			: "$g_login_method         = CRYPT;",
+		"$g_login_method"			: "$g_login_method         = MD5;",
 		"$g_limit_reporters"		: "$g_limit_reporters         = ON;",
 		"$g_allow_close_immediately": "$g_allow_close_immediately = OFF;",
+		"$g_allow_account_delete"	: "$g_allow_account_delete = OFF;",
 
-		"$g_php" 					: "$g_php = \".php3\";"
+		"$g_php" 					: "$g_php = \".php\";",
 		"$g_icon_path" 				: "$g_icon_path = $g_path.\"images/\";"
 	}
 
@@ -169,6 +170,9 @@ mantis_directory = '/home/www/mantis-' + str(release)
 mantis_image_directory = mantis_directory + '/images'
 mantis_doc_directory = mantis_directory + '/doc'
 mantis_lang_directory = mantis_directory + '/lang'
+mantis_default_directory = mantis_directory + '/default'
+mantis_sql_directory = mantis_directory + '/sql'
+
 print '[ 03 ]  Making directory: ' + mantis_directory
 res = os.system( 'mkdir ' + mantis_directory )
 
@@ -178,76 +182,85 @@ print '[ 04a]  Making Mantis doc directory'
 res = os.system( 'mkdir ' + mantis_doc_directory )
 print '[ 04b]  Making Mantis lang directory'
 res = os.system( 'mkdir ' + mantis_lang_directory )
+print '[ 04c]  Making Mantis default directory'
+res = os.system( 'mkdir ' + mantis_default_directory )
+print '[ 04d]  Making Mantis sql directory'
+res = os.system( 'mkdir ' + mantis_sql_directory )
 
 print '[ 05 ]  Copying Mantis files'
 res = os.system( 'cp /home/www/mantis/* ' + mantis_directory )
+res = os.system( 'rm '+mantis_directory+'/config_inc.php' )
 
 print '[ 06 ]  Copying Mantis image files'
 res = os.system( 'cp /home/www/mantis/images/* ' + mantis_image_directory )
 print '[ 06a]  Copying Mantis doc files'
 res = os.system( 'cp /home/www/mantis/doc/* ' + mantis_doc_directory )
-print '[ 06a]  Copying Mantis lang files'
+print '[ 06b]  Copying Mantis lang files'
 res = os.system( 'cp /home/www/mantis/lang/* ' + mantis_lang_directory )
+print '[ 06c]  Copying Mantis default files'
+res = os.system( 'cp /home/www/mantis/default/* ' + mantis_default_directory )
+print '[ 06d]  Copying Mantis sql files'
+res = os.system( 'cp /home/www/mantis/sql/* ' + mantis_sql_directory )
 
 # read in config file
 print '[ 07 ]  Reading in original config file'
-infile = open( '/home/www/mantis/config_inc.php', 'r' )
+infile = open( '/home/www/mantis/default/config_inc.php', 'r' )
 config_file = infile.readlines()
 infile.close()
 
 # open config file for writing
-print '[ 08 ]  Opening new config file'
-outfile = open( mantis_directory + '/config_inc.php', 'w' )
+#print '[ 08 ]  Opening new config file'
+#outfile = open( mantis_default_directory + '/config_inc.php', 'w' )
 
-print '[ 09 ]  Processing file... Inserting default values'
+#print '[ 09 ]  Processing file... Inserting default values'
 
-config_file_len = len( config_file )
+#config_file_len = len( config_file )
 
 ### BEGIN REPLACEMENTS
 # perform replacements for default values
-for i in range ( config_file_len ):
-	line = strip( config_file[i] )
+#for i in range ( config_file_len ):
+#	line = strip( config_file[i] )
 
 #	DO common replacements
 #	check to see if a replacement is needed
-	key = check_keys ( line, replacement_table.keys() )
-	if ( key != -1 ):
-		print '[ 10 ]  Processing Value : ' + key
-		config_file[i] = replacement_table[key];
+#	key = check_keys ( line, replacement_table.keys() )
+#	if ( key != -1 ):
+#		print '[ 10 ]  Processing Value : ' + key
+#		config_file[i] = replacement_table[key];
 
 #	DO specialized replacements
 #	set version
-	if ( find( line, '$g_mantis_version' ) != -1 ):
-		config_file[i] = "$g_mantis_version = \"" + release + "\";"
+#	if ( find( line, '$g_mantis_version' ) != -1 ):
+#		config_file[i] = "$g_mantis_version = \"" + release + "\";"
 
 #	comment out error_reporting()
-	if ( find( line, 'error_reporting' ) != -1 ):
-		if ( find( line, '#' ) == -1 ):
-			config_file[i] = "#" + line
+#	if ( find( line, 'error_reporting' ) != -1 ):
+#		if ( find( line, '#' ) == -1 ):
+#			config_file[i] = "#" + line
 
 ### END REPLACEMENTS
 
 # write out the new config file
-print '[ 11 ]  Writing new config file'
-for i in range ( config_file_len ):
-	line = strip( config_file[i] )
+#print '[ 11 ]  Writing new config file'
+#for i in range ( config_file_len ):
+#	line = strip( config_file[i] )
 
 #	skip empty lines
-	if (len(line)==0):
-		outfile.write( '\n' )
-		continue
+#	if (len(line)==0):
+#		outfile.write( '\n' )
+#		continue
 
 #	print properly formatted output
-	if (line[0]=="<"):
-		outfile.write( line + '\n' )
-	elif (line[0]=="?"):
-		outfile.write( line )
-	else:
-		outfile.write( '\t' + line + '\n' )
+#	if (line[0]=="<"):
+#		outfile.write( line + '\n' )
+#	elif (line[0]=="?"):
+#		outfile.write( line )
+#	else:
+#		outfile.write( '\t' + line + '\n' )
 
 # close config file
-print '[ 12 ]  Closing new config file'
-outfile.close()
+#print '[ 12 ]  Closing new config file'
+#outfile.close()
 
 print '[ 13 ]  Creating TAR archive'
 res =  os.system( 'tar cf ' + release_name + '.tar ' + release_name )

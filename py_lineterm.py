@@ -78,7 +78,7 @@ def toMac( fileName, fileType ):
 	OUTFILE = open( "~temp", "w" )
 	
 	char = FILE.read( 1 )
-	last = 0;
+	last = 0
 	
 	while char:
 		if fileType == "UNIX":
@@ -92,8 +92,11 @@ def toMac( fileName, fileType ):
 			if last == chr(0x0a):				# if last character was CR
 				if char == chr(0x0d):			# ...and this one is LF
 					OUTFILE.write( chr(0x0d) )	# then replace CR/LF with CR
+					last = 0
+				else:
+					OUTFILE.write( char )
 			elif char == chr(0x0a):
-				last = chr(0x0a);
+				last = chr(0x0a)
 			else:
 				OUTFILE.write( char )
 		char = FILE.read( 1 )
@@ -125,6 +128,8 @@ def toPC( fileName, fileType ):
 			if char == chr(0x0d):
 				OUTFILE.write( chr(0x0d) )	# replace CR with CR/LF
 				OUTFILE.write( chr(0x0a) )
+			else:
+				OUTFILE.write( char )
 		elif fileType == "PC":
 			OUTFILE.write( char )			# file already in PC format
 		char = FILE.read( 1 )
@@ -150,12 +155,17 @@ def toUNIX( fileName, fileType ):
 		elif fileType == "MAC":
 			if char == chr(0x0d):
 				OUTFILE.write( chr(0x0a) )
+			else:
+				OUTFILE.write( char )
 		elif fileType == "PC":
 			if last == chr(0x0d):				# if last character was CR
 				if char == chr(0x0a):			# ...and this one is LF
 					OUTFILE.write( chr(0x0a) )	# then replace CR/LF with LF
+					last = 0
+				else:
+					OUTFILE.write( char )
 			elif char == chr(0x0d):
-				last = chr(0x0d);
+				last = chr(0x0d)
 			else:
 				OUTFILE.write( char )
 		char = FILE.read( 1 )

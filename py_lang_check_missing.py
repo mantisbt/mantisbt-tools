@@ -64,6 +64,8 @@ def process_string( p_string ):
 	for a in words:
 		if ( -1 != find( a, "$s_" ) ):
 			return a
+		if ( -1 != find( a, "$MANTIS_" ) ):
+			return a
 	return ""
 # --- ------
 def init():

@@ -5,17 +5,17 @@
 # <This one may actually be cross-platform!!!>
 #
 # Usage: python lineterm.py [options] files
-#	
+#
 # Options:
 #  	-h, --help    : Show this message
 #	-m, --mac     : Convert file(s) to Mac format (carriage returns)
 #	-p, --pc      : Convert file(s) to PC format (carriage return/linefeeds)
 #	-u, --unix    : Convert file(s) to Unix format (linefeeds)
 #   -v, --verbose : Show the number of CRs, LFs, and CR/LFs for the file(s)
-#	
+#
 # Arguments:
 #	files : any file or group of files (wildcards allowed)
-#		
+#
 # Note:
 #	Does not currently recurse directories or distinguish between
 #	binary and ASCII file types.  Creates a ~temp file in the current
@@ -37,7 +37,7 @@ def main():
 		# print help information and exit:
 		usage()
 		sys.exit( 2 )
-	
+
 	for o, a in opts:
 		if o in ("-h", "--help"):
 			usage()
@@ -52,11 +52,11 @@ def main():
 			convertToUNIX = 1
 		if o in ("-v", "--verbose"):
 			isVerbose = 1
-	
+
 	if len(args) == 0:
 		usage()
 		sys.exit()
-	
+
 	for FILE in args:
 		fileType = readFile( FILE, isVerbose )
 		if fileType != "Undefined":
@@ -73,13 +73,13 @@ def main():
 
 def toMac( fileName, fileType ):
 	FILE = open( fileName, "r" )
-	
+
 	os.system( "touch ~temp" )
 	OUTFILE = open( "~temp", "w" )
-	
+
 	char = FILE.read( 1 )
 	last = 0
-	
+
 	while char:
 		if fileType == "UNIX":
 			if char == chr(0x0a):				# LINE FEED
@@ -100,7 +100,7 @@ def toMac( fileName, fileType ):
 			else:
 				OUTFILE.write( char )
 		char = FILE.read( 1 )
-			
+
 
 	FILE.close()
 	OUTFILE.close()
@@ -108,13 +108,13 @@ def toMac( fileName, fileType ):
 
 	print "MAC"
 
-	
+
 def toPC( fileName, fileType ):
 	FILE = open( fileName, "r" )
-	
+
 	os.system( "touch ~temp" )
 	OUTFILE = open( "~temp", "w" )
-	
+
 	char = FILE.read( 1 )
 
 	while char:
@@ -133,19 +133,19 @@ def toPC( fileName, fileType ):
 		elif fileType == "PC":
 			OUTFILE.write( char )			# file already in PC format
 		char = FILE.read( 1 )
-		
+
 	FILE.close()
 	OUTFILE.close()
 	os.system( "mv ~temp " + fileName + ".PC" )
 
 	print "PC"
-	
+
 def toUNIX( fileName, fileType ):
 	FILE = open( fileName, "r" )
-	
+
 	os.system( "touch ~temp" )
 	OUTFILE = open( "~temp", "w" )
-	
+
 	char = FILE.read( 1 )
 	last = 0
 
@@ -183,10 +183,10 @@ def readFile( fileName, isVerbose ):
 	numCRLF = 0
 
 	FILE = open( fileName, "r" )
-	
+
 	char = FILE.read( 1 )
 	last = 0
-	
+
 	while char:
 		if char == chr(0x0a):			# LINE FEED
 			numLF = numLF + 1
@@ -201,9 +201,9 @@ def readFile( fileName, isVerbose ):
 		char = FILE.read( 1 )
 
 	FILE.close()
-	
+
 	fileType = "Undefined"
-	
+
 	if numCRLF > 0:
 		print fileName, ": PC Format (CR/LF)"
 		fileType = "PC"
@@ -223,7 +223,7 @@ def readFile( fileName, isVerbose ):
 	else:
 		print fileName, ": This file had no terminators"
 
-	if isVerbose:	
+	if isVerbose:
 		print "CR:   ", numCR
 		print "LF:   ", numLF
 		print "CRLF: ", numCRLF
@@ -233,17 +233,17 @@ def readFile( fileName, isVerbose ):
 def usage():
 	print '''\
 	Usage: 	python lineterm.py [options] files
-	
+
 	Options:
 		-h, --help    : Show this message
 		-m, --mac     : Convert file(s) to Mac format (carriage returns)
 		-p, --pc      : Convert file(s) to PC format (carriage return/linefeeds)
 		-u, --unix    : Convert file(s) to Unix format (linefeeds)
 		-v, --verbose : Show the number of CRs, LFs, and CR/LFs for the file(s)
-	
+
 	Arguments:
 		files : any file or group of files (wildcards allowed)
-		
+
 	Note:
 		Does not currently recurse directories or distinguish between
 		binary and ASCII file types.  Creates a ~temp file in current

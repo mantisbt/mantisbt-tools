@@ -203,10 +203,10 @@ print '[ 06d]  Copying Mantis sql files'
 res = os.system( 'cp /home/www/mantis/sql/* ' + mantis_sql_directory )
 
 # read in config file
-print '[ 07 ]  Reading in original config file'
-infile = open( '/home/www/mantis/default/config_inc.php', 'r' )
-config_file = infile.readlines()
-infile.close()
+#print '[ 07 ]  Reading in original config file'
+#infile = open( '/home/www/mantis/default/config_inc.php', 'r' )
+#config_file = infile.readlines()
+#infile.close()
 
 # open config file for writing
 #print '[ 08 ]  Opening new config file'

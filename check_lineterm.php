@@ -13,19 +13,19 @@
 	# - ---
 	function print_result( $p_result ) {
 		switch( $p_result ) {
-			case CRLF_ONLY:	echo "Windows Format\n";
+			case CRLF_ONLY:	echo "*** Windows Format\n";
 				break;
-			case CR_ONLY:	echo "Mac Format\n";
+			case CR_ONLY:	echo "*** Mac Format\n";
 				break;
 			case LF_ONLY:	echo "UNIX Format\n";
 				break;
 			case LFCR_MIXED:	echo "### Mixed Format: LF and CR\n";
 				break;
-			case LFCRLF_MIXED:	echo "###Mixed Format: LF and CRLF\n";
+			case LFCRLF_MIXED:	echo "### Mixed Format: LF and CRLF\n";
 				break;
-			case CRLFCR_MIXED:	echo "###Mixed Format: CRLF and CR\n";
+			case CRLFCR_MIXED:	echo "### Mixed Format: CRLF and CR\n";
 				break;
-			case CRLFCRLF_MIXED:	echo "###Mixed Format: CRLF and CR and LF\n";
+			case CRLFCRLF_MIXED:echo "### Mixed Format: CRLF and CR and LF\n";
 				break;
 		}
 	}
@@ -153,26 +153,32 @@
 		}
 		chdir( '..' );
 	}
+	# - ---
+	function print_usage() {
+		echo "\nUsage:\n        -c check files\n        -f fix file\n        -a fix all files\n";
+	}
+	# - ---
 
 	# -- MAIN --
 	$argv = $_SERVER['argv'];
 	$argc = $_SERVER['argc'];
 
+	# too few arguments?
 	if ( $argc < 2 ) {
-		echo "\nUsage:\n        -c check files\n        -f fix file\n        -a fix all files\n";
+		print_usage();
+	}
+
+	if ( '-c' == $argv[1] ) {
+		if ( isset( $argv[2] ) ) {
+			process_files( $argv[2] );
+		} else {
+			process_files( '.' );
+		}
+	} else if ( '-f' == $argv[1] ) {
+		rewrite_file( $argv[2] );
+	} else if ( '-a' == $argv[1] ) {
+		process_files_rewrite( $argv[2] );
 	} else {
-		if ( '-c' == $argv[1] ) {
-			if ( isset( $argv[2] ) ) {
-				process_files( $argv[2] );
-			} else {
-				process_files( '.' );
-			}
-		}
-		if ( '-f' == $argv[1] ) {
-			rewrite_file( $argv[2] );
-		}
-		if ( '-a' == $argv[1] ) {
-			process_files_rewrite( $argv[2] );
-		}
+		print_usage();
 	}
 ?>

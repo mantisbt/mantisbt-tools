@@ -41,7 +41,7 @@
 	# read in all files
 	function process_files( $p_dir ) {
 		$cwd = getcwd();
-		$cwd .= '\\'.$p_dir;
+		$cwd .= DIRECTORY_SEPARATOR.$p_dir;
 		chdir( $cwd );
 		if ( $handle = opendir( $cwd ) ) {
 			echo "Directory: ".getcwd()."\n";
@@ -59,7 +59,7 @@
 			    	# directory
 					process_files( $file );
 			    } else {
-			    	echo "Processing: ".getcwd()."\\".$file."";
+			    	echo "Processing: ".getcwd().DIRECTORY_SEPARATOR.$file."";
 			    	$result = check_lineterm( $file );
 			    	echo "\n";
 			    	if ( LF_ONLY != $result ) {
@@ -137,7 +137,7 @@
 	# read in all files
 	function process_files_rewrite( $p_dir ) {
 		$cwd = getcwd();
-		$cwd .= '\\'.$p_dir;
+		$cwd .= DIRECTORY_SEPARATOR.$p_dir;
 		chdir( $cwd );
 		if ( $handle = opendir( $cwd ) ) {
 			echo "Directory: ".getcwd()."\n";
@@ -154,8 +154,8 @@
 			    	# directory
 					process_files_rewrite( $file );
 			    } else {
-			    	echo "Processing: ".getcwd()."\\".$file."";
-					rewrite_file( getcwd()."\\".$file );
+			    	echo "Processing: ".getcwd().DIRECTORY_SEPARATOR.$file."";
+					rewrite_file( getcwd().DIRECTORY_SEPARATOR.$file );
 					echo "\n";
 			    }
 		    }

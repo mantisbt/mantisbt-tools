@@ -59,7 +59,7 @@
 			    	# directory
 					process_files( $file );
 			    } else {
-			    	echo "Procesing: ".getcwd()."\\".$file."";
+			    	echo "Processing: ".getcwd()."\\".$file."";
 			    	$result = check_lineterm( $file );
 			    	echo "\n";
 			    	if ( LF_ONLY != $result ) {
@@ -154,8 +154,9 @@
 			    	# directory
 					process_files_rewrite( $file );
 			    } else {
-			    	echo "Procesing: ".getcwd()."\\".$file."";
+			    	echo "Processing: ".getcwd()."\\".$file."";
 					rewrite_file( getcwd()."\\".$file );
+					echo "\n";
 			    }
 		    }
 		}

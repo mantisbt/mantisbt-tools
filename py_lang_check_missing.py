@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-# This file checkes the filename lengths of all files in a directory.
-# Any files over 32 characters in length must be shortened.
+# Checks for missing strings
+# Eliminates unused strings
 
 import sys
 from string import *
@@ -22,10 +22,12 @@ def process_lang_strings( p_lang_file ):
 	lang_lines = lang_file.readlines()
 	lang_file.close()
 
+	# populate lang_strings
 	for i in lang_lines:
 		string_key = process_string( i )
 		if ( len( string_key ) > 0 ):
-			lang_strings[string_key] = i
+			# strip leading whitespace
+			lang_strings[string_key] = lstrip(i)
 
 	#lang_file = open( p_lang_file+".new", "w" )
 	lang_file = open( p_lang_file, "w" )
@@ -33,16 +35,16 @@ def process_lang_strings( p_lang_file ):
 	# print header part
 	for i in lang_lines:
 		if ( found( i, "?>" ) ):
+			lang_file.write( i )
 			break
 		lang_file.write( i )
 
 	header = 0;
 	for i in english_strings:
+		# skip header for english file
 		if ( 0 == header ):
 			if ( found( i, "?>" ) ):
-				lang_file.write( i )
 				header = 1
-			continue
 		else:
 			string_key = process_string( i )
 			if (( len( string_key ) > 0 )&( lang_strings.has_key( string_key ) )):
@@ -58,40 +60,29 @@ def found( p_string, p_sub_str ):
 	else:
 		return 0
 # --- ------
-# GOOD
 def process_string( p_string ):
 	p_string = translate( p_string, maketrans( "()\\;<>:\".,", "          " ) )
 	words = split( p_string )
 	for a in words:
-		if ( -1 != find( a, "$s_" ) ):
-			return a
-		if ( -1 != find( a, "$MANTIS_" ) ):
+		if ( -1 != find( a, "$" ) ):
 			return a
 	return ""
-# --- ------
-def init():
-	global lang_file_list, lang_dir
-
-	lang_file_list = os.listdir( lang_dir )
-	lang_file_list.sort()
 # --- ------
 
 # ===========================
 #             MAIN
 # ===========================
-
-lang_dir = "/home/www/mantis/lang/"
-lang_file_list = []
+lang_dir = os.getcwd()
 lang_strings = {}
 english_strings = {}
+lang_file_list = os.listdir( lang_dir )
+lang_file_list.sort()
 
-# --- ------
-
-init()
+print "Checking for Missing Strings"
 print "Loading: strings_english.txt"
-gather_english_strings( lang_dir+"strings_english.txt" )
+gather_english_strings( lang_dir+"\\strings_english.txt" )
 for lang_file in lang_file_list:
 	lang_strings = {}
-	if (( not found( lang_file, "english" ) )&( found( lang_file, "txt" ) )):
+	if (( lang_file != "strings_english.txt" )&( found( lang_file, "txt" ) )):
 		print "Processing: "+lang_file
-		process_lang_strings( lang_dir+lang_file )
+		process_lang_strings( lang_dir+"\\"+lang_file )

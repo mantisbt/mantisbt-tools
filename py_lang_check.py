@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-# This file checkes the filename lengths of all files in a directory.
-# Any files over 32 characters in length must be shortened.
+#
 
 import sys
 from string import *
@@ -79,37 +78,22 @@ def process_string_file( p_lang_file ):
 		lang_file.write( i )
 	lang_file.close()
 # --- ------
-def init():
-	global lang_file_list, php_file_list, lang_dir
-
-	php_directory = ".";
-	if ( len(sys.argv) < 2 ):
-		php_file_list = os.listdir( php_directory )
-	elif ( 2 == len(sys.argv) ):
-		php_file_list.append( sys.argv[1] )
-	else:
-		print "ERROR in program arguments"
-		sys.exit(1)
-
-	lang_file_list = os.listdir( lang_dir )
-# --- ------
 
 # ===========================
 #             MAIN
 # ===========================
-lang_dir = "/home/www/mantis/lang/"
-lang_file_list = []
-php_file_list = []
-
+lang_dir = os.getcwd()
+lang_file_list = os.listdir( lang_dir )
+lang_file_list.sort()
 php_strings = {}
 lang_strings = {}
-# --- ------
 
-init()
 print "Pre Processing Files"
 for php_file in php_file_list:
 	if ( found( php_file, ".php" ) ):
 		gather_php_strings( php_file )
+
+print lang_file_list
 
 #lang_file_list = ["strings_english.txt"]
 for lang_file in lang_file_list:
@@ -118,3 +102,4 @@ for lang_file in lang_file_list:
 		print "Processing File: "+lang_file
 		gather_lang_strings( lang_dir+lang_file )
 		process_string_file( lang_dir+lang_file )
+

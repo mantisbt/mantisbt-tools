@@ -1,4 +1,12 @@
 <?php
+	/*
+	This script does two things:
+
+	- Check and show the differences between two languages files.
+	- Merge the changes from one (new) into the other (old).
+
+	*/
+
 	# -- GLOBAL VARIABLES --
 	$new_strings = array();
 	$old_strings = array();
@@ -160,7 +168,7 @@
 	}
 	# - ---
 	function print_usage() {
-		echo "\nUsage:\n        php -q merge_lang.php <option> <oldfile> <newfile>\n        -c compare only\n        -m merge        -q silence missing\n";
+		echo "\nUsage:\n        php -q merge_lang.php <option> <oldfile> <newfile>\n        -c compare only\n        -m merge\n        -q silence missing\n";
 	}
 	# - ---
 

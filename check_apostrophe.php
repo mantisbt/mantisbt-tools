@@ -1,4 +1,11 @@
 <?php
+	/*
+	This script does the following:
+
+	- Checks for unescaped single quotes in the middle of strings.  User must edit by hand.
+
+	*/
+
 	# -- GLOBAL VARIABLES --
 	$lang_files = array();
 	$english_strings = array();
@@ -59,6 +66,6 @@
 		exit;
 	}
 
-	echo "Processing: $file\n";
+	echo "Processing: ".$argv[1]."\n";
 	check_apostrophes( $argv[1] );
 ?>

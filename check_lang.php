@@ -1,4 +1,14 @@
 <?php
+	/*
+	This script does the following:
+
+	- Checks for missing strings
+	- Checks for duplicate strings
+	- Orders strings according to the English template.
+	- Fills in missing strings with English strings.
+
+	*/
+
 	# -- GLOBAL VARIABLES --
 	$lang_files = array();
 	$english_strings = array();

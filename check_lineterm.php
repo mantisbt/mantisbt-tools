@@ -1,4 +1,12 @@
 <?php
+	/*
+	This script does the following:
+
+	- Checks the lineterm characters of each file and reportsif the formats are NOT in UNIX format (\n)
+	- Rewrites files with UNIX lineterms only.
+
+	*/
+
 	# -- GLOBAL VARIABLES --
 	$lang_files = array();
 	$english_strings = array();

@@ -2,6 +2,7 @@
 	# -- GLOBAL VARIABLES --
 	$new_strings = array();
 	$old_strings = array();
+	$quiet_flag = 0;
 	# - ---
 	function load_files( $p_old_file, $p_new_file ) {
 		global $new_strings, $old_strings;
@@ -41,7 +42,7 @@
 	}
 	# - ---
 	function compare_files() {
-		global $new_strings, $old_strings;
+		global $new_strings, $old_strings, $quiet_flag;
 
 		# create keyed array of the new strings
 		$strings = $new_strings;
@@ -84,7 +85,9 @@
 					}
 				} else {
 					$missing_counter++;
-					echo "[$t_counter] NEWFILE IS MISSING: $original_string \n\n";
+					if ( 0 == $quiet_flag ) {
+						echo "[$t_counter] NEWFILE IS MISSING: $original_string \n\n";
+					}
 				}
 			}
 		}
@@ -157,7 +160,7 @@
 	}
 	# - ---
 	function print_usage() {
-		echo "\nUsage:\n        php -q merge_lang.php <option> <oldfile> <newfile>\n        -c compare only\n        -m merge\n";
+		echo "\nUsage:\n        php -q merge_lang.php <option> <oldfile> <newfile>\n        -c compare only\n        -m merge        -q silence missing\n";
 	}
 	# - ---
 
@@ -169,6 +172,13 @@
 	if ( $argc < 4 ) {
 		print_usage();
 		exit;
+	}
+
+	$quiet_flag = 0;
+	foreach ( $argv as $param ) {
+		if ( '-q' == $param ) {
+			$quiet_flag = 1;
+		}
 	}
 
 	if ( '-c' == $argv[1] ) {

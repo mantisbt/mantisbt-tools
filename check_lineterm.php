@@ -155,7 +155,7 @@
 	}
 	# - ---
 	function print_usage() {
-		echo "\nUsage:\n        -c check files\n        -f fix file\n        -a fix all files\n";
+		echo "\nUsage:\n        php -q check_lineterm.php <option> <path/folder>\n        -c check files\n        -f fix file\n        -a fix all files\n";
 	}
 	# - ---
 
@@ -166,6 +166,7 @@
 	# too few arguments?
 	if ( $argc < 2 ) {
 		print_usage();
+		exit;
 	}
 
 	if ( '-c' == $argv[1] ) {

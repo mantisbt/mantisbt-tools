@@ -105,13 +105,26 @@
 			}
 		}
 	}
+	# - ---
+	function print_usage() {
+		echo "\nUsage:\n        php -q check_lang.php <path/folder>\n";
+	}
+	# - ---
 
 	# -- MAIN --
-	print "Checking for missing and duplicate strings.\n";
+	$argv = $_SERVER['argv'];
+	$argc = $_SERVER['argc'];
+
+	# too few arguments?
+	if ( $argc < 2 ) {
+		print_usage();
+		exit;
+	} else if ( !is_dir( $argv[1] ) ) {
+		print_usage();
+		exit;
+	}
 
 	grab_lang_files();
-
-	#check_lineterms( 'asd.txt' );
 
 	foreach( $lang_files as $file ) {
 		if ( 'strings_english.txt' != $file ) {

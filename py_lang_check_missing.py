@@ -27,7 +27,8 @@ def process_lang_strings( p_lang_file ):
 		if ( len( string_key ) > 0 ):
 			lang_strings[string_key] = i
 
-	lang_file = open( p_lang_file+".new", "w" )
+	#lang_file = open( p_lang_file+".new", "w" )
+	lang_file = open( p_lang_file, "w" )
 
 	# print header part
 	for i in lang_lines:
@@ -78,10 +79,12 @@ def init():
 # ===========================
 #             MAIN
 # ===========================
+
 lang_dir = "/home/www/mantis/lang/"
 lang_file_list = []
 lang_strings = {}
 english_strings = {}
+
 # --- ------
 
 init()

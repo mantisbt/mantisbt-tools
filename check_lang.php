@@ -43,7 +43,7 @@
 		}
 		$p_string = str_replace( ' ', '', $p_string );
 		$p_array = explode('=', $p_string);
-		return $p_array[0];
+		return trim($p_array[0]);
 	}
 	# - ---
 	function check_missing( $p_file ) {

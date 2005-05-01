@@ -52,7 +52,7 @@
 		    closedir( $handle );
 		    foreach( $file_arr as $file ) {
 		    	#echo "file: $file\n";
-				if (( '.' == $file )||( '..' == $file )||( 'CVS' == $file ) || ereg('\.(jpg|gif|png)$', $file)) {
+				if (( '.' == $file )||( '..' == $file )||( 'CVS' == $file ) || ereg('\.(jpg|gif|png|zip)$', $file)) {
 					continue;
 				}
 			    if ( TRUE == is_dir( $file ) ) {
@@ -147,7 +147,7 @@
 			}
 		    closedir( $handle );
 		    foreach( $file_arr as $file ) {
-				if (( '.' == $file )||( '..' == $file )||( 'CVS' == $file ) || ereg('\.(jpg|gif|png)$', $file)) {
+				if (( '.' == $file )||( '..' == $file )||( 'CVS' == $file ) || ereg('\.(jpg|gif|png|zip)$', $file)) {
 					continue;
 				}
 			    if ( TRUE == is_dir( $file ) ) {

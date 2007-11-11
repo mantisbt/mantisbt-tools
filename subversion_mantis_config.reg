@@ -1,0 +1,17 @@
+REGEDIT4
+
+[HKEY_CURRENT_USER\Software\Tigris.org\Subversion\Config\auto-props]
+"*.php"="svn:eol-style=native;svn:keywords=Author Date Id Revision"
+"*.txt"="svn:eol-style=native;svn:keywords=Author Date Id Revision"
+"*.css"="svn:eol-style=native"
+"*.js"="svn:eol-style=native"
+"*.sample"="svn:eol-style"
+"*.html"="svn:eol-style=native"
+"*.htm"="svn:eol-style=native"
+"*.htaccess"="svn:eol-style=native"
+"*.png"="svn:mime-type=image/png"
+"*.jpg"="svn:mime-type=image/jpeg"
+"*.gif"="svn:mime-type=image/gif"
+
+[HKEY_CURRENT_USER\Software\Tigris.org\Subversion\Config\miscellany]
+"enable-auto-props"="yes"

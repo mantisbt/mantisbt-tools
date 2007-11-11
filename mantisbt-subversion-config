@@ -1,0 +1,26 @@
+### Set enable-auto-props to 'yes' to enable automatic properties
+### for 'svn add' and 'svn import', it defaults to 'no'.
+### Automatic properties are defined in the section 'auto-props'.
+
+enable-auto-props = yes
+
+### Section for configuring automatic properties.
+### The format of the entries is:
+###   file-name-pattern = propname[=value][;propname[=value]...]
+### The file-name-pattern can contain wildcards (such as '*' and
+### '?').  All entries which match will be applied to the file.
+### Note that auto-props functionality must be enabled, which
+### is typically done by setting the 'enable-auto-props' option.
+
+[auto-props]
+*.php = svn:eol-style=native;svn:keywords=Author Date Id Revision
+*.txt = svn:eol-style=native;svn:keywords=Author Date Id Revision
+*.css = svn:eol-style=native
+*.js = svn:eol-style=native
+*.sample = svn:eol-style=native
+*.html = svn:eol-style=native
+*.htm = svn:eol-style=native
+*.htaccess = svn:eol-style=native
+*.png = svn:mime-type=image/png
+*.jpg = svn:mime-type=image/jpeg
+*.gif = svn:mime-type=image/gif

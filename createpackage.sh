@@ -4,8 +4,6 @@
 # Tais M. Hansen <tais.hansen@osd.dk>#
 #
 
-set -e
-
 SVNREPOS="http://mantisbt.svn.sourceforge.net/svnroot/mantisbt/tags"
 
 function digest {
@@ -71,8 +69,12 @@ fi
 echo "Retrieving ${tag} from ${SVNREPOS}."
 tag_path="$(pwd)/mantis-${tag}"
 if [[ -d "${tag_path}" ]]; then
-    echo "Error: Tag directory already exists: ${tag_path}"
-    exit 1
+    if [[ -n $cleanup ]]; then
+        rm -rf ${tag_path}
+    else    
+        echo "Error: Tag directory already exists: ${tag_path}"
+        exit 1
+    fi
 fi
 svn export --quiet --native-eol LF "${SVNREPOS}/${tag}" "${tag_path}"
 
@@ -80,8 +82,8 @@ svn export --quiet --native-eol LF "${SVNREPOS}/${tag}" "${tag_path}"
 if [[ -z "${release}" ]]; then
     echo "Attempting to retrieve release name."
     pushd ${tag_path} >/dev/null
-    release=$(php -r 'include "core/constant_inc.php"; echo MANTIS_VERSION;')
-#release=$(awk "/MANTIS_VERSION/{if(match(\$0, /define\(.*'MANTIS_VERSION'.*'([^']+)'.*\);/, m)){print m[1];}}" core/constant_inc.php)
+#release=$(php -r 'include "core/constant_inc.php"; echo MANTIS_VERSION;')
+    release=$(awk "/MANTIS_VERSION/{if(match(\$0, /define\(.*'MANTIS_VERSION'.*'([^']+)'.*\);/, m)){print m[1];}}" core/constant_inc.php)
     popd >/dev/null
     if [[ -z "${release}" ]]; then
         echo "Error: Failed to parse MANTIS_VERSION in core/constant_inc.php"
@@ -95,8 +97,12 @@ echo "Preparing release directory."
 release_name="mantis-${release}"
 release_path="$(pwd)/${release_name}"
 if [[ -d "${release_path}" ]]; then
-    echo "Error: Release directory already exists: ${release_path}"
-    exit 1
+    if [[ -n $cleanup ]]; then
+        rm -rf ${release_path}
+    else
+        echo "Error: Release directory already exists: ${release_path}"
+        exit 1
+    fi
 fi
 mv "${tag_path}" "${release_path}"
 
@@ -114,9 +120,14 @@ echo "Generating tar-archive and digests."
 tar czf "${release_name}.tar.gz" "${release_name}"
 digest "${release_name}.tar.gz"
 
-echo "Generating zip-archive and digests."
-zip -qr "${release_name}.zip" "${release_name}"
-digest "${release_name}.zip"
+type zip > /dev/null
+if [ $? != "0" ]; then
+    echo "Can not find 'zip' command in path: skipping creation."
+else
+    echo "Generating zip-archive and digests."
+    zip -qr "${release_name}.zip" "${release_name}"
+    digest "${release_name}.zip"
+fi
 
 # Show resulting archives and digest-files.
 ls -l ${release_name}.tar.gz*

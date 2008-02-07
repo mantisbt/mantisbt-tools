@@ -15,6 +15,9 @@ enable-auto-props = yes
 [auto-props]
 *.php = svn:eol-style=native;svn:keywords=Author Date Id Revision
 *.txt = svn:eol-style=native;svn:keywords=Author Date Id Revision
+*.sgml=svn:mine-type=text/sgml;svn:eol-style=native;svn:keywords=Author Date Id Revision
+*.dsl=svn:mime-type=text/xml;svn:eol-style=native
+*.ent=svn:mime-type=text/xml;svn:eol-style=native
 *.css = svn:eol-style=native
 *.js = svn:eol-style=native
 *.sample = svn:eol-style=native

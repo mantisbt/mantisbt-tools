@@ -11,7 +11,7 @@ def main():
 		usage()
 		sys.exit(1)
 
-	svnroot = sys.argv[1]
+	docroot = sys.argv[1]
 	installroot = sys.argv[2]
 	languages = []
 
@@ -19,7 +19,7 @@ def main():
 		languages = sys.argv[3:]
 
 	print "Updating SVN checkout..."
-	os.chdir( svnroot )
+	os.chdir( docroot )
 	os.system( 'svn update' )
 
 	for dir in os.listdir( svnroot ):
@@ -29,12 +29,12 @@ def main():
 		if len(languages) > 0:
 			langs = languages
 		else:
-			langs = os.listdir( path.join( svnroot, dir ) )
+			langs = os.listdir( path.join( docroot, dir ) )
 			if langs.count('.svn'):
 				langs.remove('.svn')
 
 		for lang in langs:
-			builddir = path.join( svnroot, dir, lang )
+			builddir = path.join( docroot, dir, lang )
 			installdir = path.join( installroot, lang ) 
 			if path.isdir( builddir ):
 				print "Building manual in " + builddir

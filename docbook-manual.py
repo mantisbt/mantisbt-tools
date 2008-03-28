@@ -22,7 +22,7 @@ def main():
 	os.chdir( docroot )
 	os.system( 'svn update' )
 
-	for dir in os.listdir( svnroot ):
+	for dir in os.listdir( docroot ):
 		if dir == '.svn' or dir == 'template':
 			continue
 

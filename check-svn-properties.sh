@@ -5,7 +5,7 @@
 #
 # This script sets the required Subversion properties for all files in
 # the current directory and all subdirectories based on file extensions.
-# As result the current difference to be checkig in is written to stdout.
+# As result the current difference to be checked in is written to stdout.
 #
 
 svn up

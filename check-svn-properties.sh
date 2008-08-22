@@ -11,12 +11,12 @@
 svn up
 
 find . -name \*.php -exec svn propset svn:eol-style native {} \; >/dev/null
-find . -name \*.php -exec svn propset svn:keywords 'Id' {} \; >/dev/null
+find . -name \*.php -exec svn propset svn:keywords 'Author Date Id Revision' {} \; >/dev/null
 find . -name \*.txt -exec svn propset svn:eol-style native {} \; >/dev/null
-find . -name \*.txt -exec svn propset svn:keywords 'Id' {} \; >/dev/null
+find . -name \*.txt -exec svn propset svn:keywords 'Author Date Id Revision' {} \; >/dev/null
 find . -name \*.sgml -exec svn propset svn:mime-type text/sgml {} \; >/dev/null
 find . -name \*.sgml -exec svn propset svn:eol-style native {} \; >/dev/null
-find . -name \*.sgml -exec svn propset svn:keywords 'Id' {} \; >/dev/null
+find . -name \*.sgml -exec svn propset svn:keywords 'Author Date Id Revision' {} \; >/dev/null
 find . -name \*.dsl -exec svn propset svn:mime-type text/xml {} \; >/dev/null
 find . -name \*.dsl -exec svn propset svn:eol-style native {} \; >/dev/null
 find . -name \*.ent -exec svn propset svn:mime-type text/xml {} \; >/dev/null

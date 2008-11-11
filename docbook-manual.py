@@ -18,9 +18,7 @@ def main():
 	if len(sys.argv) > 3:
 		languages = sys.argv[3:]
 
-	print "Updating SVN checkout..."
 	os.chdir( docroot )
-	os.system( 'svn update' )
 
 	for dir in os.listdir( docroot ):
 		if dir == '.svn' or dir == 'template':

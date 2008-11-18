@@ -6,6 +6,7 @@
 import os, sys
 from os import path
 
+import getopt
 import re
 
 # Absolute path to docbook-manual.py
@@ -18,8 +19,19 @@ ignorelist = map(re.compile, [
 			'-1\.1\.[\w\d]+'
 			])
 
+# Script options
+options = "hfda"
+long_options = [ "help", "force", "delete", "all", "pdf", "html" ]
+
 def usage():
-	print '''Usage: docbook-manual-repo /path/to/mantisbt/repo /path/to/install [<lang> ...]'''
+	print '''Usage: docbook-manual-repo /path/to/mantisbt/repo /path/to/install [<lang> ...]
+    Options:  -h | --help           Print this usage message
+              -f | --force          Ignore timestamps and force building
+              -d | --delete         Delete install directories before building
+                   --html           Build HTML manual
+                   --pdf            Build PDF manual
+              -a | --all            Build all manual types'''
+#end usage()
 
 def ignore( ref ):
 	'''Decide which refs to ignore based on regexen listed in 'ignorelist'.
@@ -33,16 +45,46 @@ def ignore( ref ):
 #end ignore()
 
 def main():
-	if len(sys.argv) < 3:
+	try:
+		opts, args = getopt.gnu_getopt(sys.argv[1:], options, long_options)
+	except getopt.GetoptError, err:
+		print str(err)
+		usage()
+		sys.exit(2)
+
+	force = False
+	pass_opts = ""
+
+	for opt, val in opts:
+		if opt in ("-h", "--help"):
+			usage()
+			sys.exit(0)
+
+		elif opt in ("-f", "--force"):
+			force = True
+
+		elif opt in ("-d", "--delete"):
+			pass_opts += " -d"
+
+		elif opt in ("-a", "--all"):
+			pass_opts += " -a"
+
+		elif opt == "--html":
+			pass_opts += " --html"
+
+		elif opt == "--pdf":
+			pass_opts += " --pdf"
+
+	if len(args) < 2:
 		usage()
 		sys.exit(1)
 
-	repo = sys.argv[1]
-	installroot = sys.argv[2]
+	repo = args[0]
+	installroot = args[1]
 	languages = []
 
-	if len(sys.argv) > 3:
-		languages = sys.argv[3:]
+	if len(sys.argv) > 2:
+		languages = args[2:]
 
 	# Update repo from default remote
 	os.chdir(repo)
@@ -74,8 +116,9 @@ def main():
 			lastbuild = f.read()
 			f.close()
 
-		if lastchange > lastbuild:
-			buildcommand = '%s %s %s %s'%(manualscript, path.abspath('docbook'), manualpath, ' '.join(languages))
+		if lastchange > lastbuild or force:
+			buildcommand = '%s %s %s %s %s'%(manualscript, pass_opts, path.abspath('docbook'), manualpath, ' '.join(languages))
+			print "Calling: " + buildcommand
 			if(os.system(buildcommand)):
 				print 'here'
 

@@ -47,6 +47,7 @@ def main():
 	# Update repo from default remote
 	os.chdir(repo)
 	os.system('git fetch')
+	os.system('git remote prune origin')
 
 	# List refs from remote branches and tags
 	branches = os.popen('git branch -r').read().split()

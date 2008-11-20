@@ -86,6 +86,7 @@ def main():
 				print "Building manual in " + builddir
 				os.chdir( builddir )
 				os.system( 'make clean %s 2>&1 && make INSTALL_DIR=%s install 2>&1'%(types, installdir) )
+				os.system( 'make clean 2>&1' )
 #end main
 
 if __name__ == '__main__':

@@ -21,7 +21,7 @@ ignorelist = map(re.compile, [
 
 # Script options
 options = "hfda"
-long_options = [ "help", "force", "delete", "all", "pdf", "html" ]
+long_options = [ "help", "force", "delete", "all", "pdf", "html", "release" ]
 
 def usage():
 	print '''Usage: docbook-manual-repo /path/to/mantisbt/repo /path/to/install [<lang> ...]
@@ -30,6 +30,7 @@ def usage():
               -d | --delete         Delete install directories before building
                    --html           Build HTML manual
                    --pdf            Build PDF manual
+                   --release        Build single file types used for release tarballs
               -a | --all            Build all manual types'''
 #end usage()
 
@@ -74,6 +75,9 @@ def main():
 
 		elif opt == "--pdf":
 			pass_opts += " --pdf"
+
+		elif opt == "--release":
+			pass_opst += " --release"
 
 	if len(args) < 2:
 		usage()

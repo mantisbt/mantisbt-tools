@@ -7,7 +7,7 @@ import getopt
 
 # Script options
 options = "hda"
-long_options = [ "help", "delete", "all", "pdf", "html" ]
+long_options = [ "help", "delete", "all", "pdf", "html", "release" ]
 
 def usage():
 	print '''Usage: docbook-manual /path/to/mantisbt/docbook /path/to/install [<lang> ...]
@@ -15,6 +15,7 @@ def usage():
 	          -d | --delete         Delete install directory before building
                    --html           Build HTML manual
                    --pdf            Build PDF manual
+                   --release        Build single file types used for release tarballs
               -a | --all            Build all manual types'''
 #end usage()
 
@@ -45,6 +46,9 @@ def main():
 
 		elif opt == "--pdf":
 			types = "pdf"
+
+		elif opt == "--release"
+			types = "html_onefile pdf text"
 
 	if len(args) < 2:
 		usage()

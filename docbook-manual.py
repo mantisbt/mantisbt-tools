@@ -47,7 +47,7 @@ def main():
 		elif opt == "--pdf":
 			types = "pdf"
 
-		elif opt == "--release"
+		elif opt == "--release":
 			types = "html_onefile pdf text"
 
 	if len(args) < 2:

@@ -16,7 +16,7 @@ ignorelist = map(re.compile, [
 			])
 
 # Script options
-options = "hrbacds:"
+options = "hr:bacds:"
 long_options = [ "help", "ref=", "branches", "auto-suffix", "clean", "docbook", "suffix=" ]
 
 def usage():

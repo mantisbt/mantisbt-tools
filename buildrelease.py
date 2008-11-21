@@ -7,7 +7,7 @@ import getopt
 import re
 
 # Script options
-options = "hcdv:"
+options = "hcdv:s:"
 long_options = [ "help", "clean", "docbook", "version=", "suffix=" ]
 
 # Absolute path to docbook-manual.py
@@ -19,7 +19,7 @@ Options:  -h | --help               Show this usage message
           -c | --clean              Remove build directory when completed
           -d | --docbook            Build the docbook manuals
           -v | --version <version>  Override version name detection
-             | --suffix <suffix>    Include version suffix in config file'''
+          -s | --suffix <suffix>    Include version suffix in config file'''
 #end usage()
 
 def main():
@@ -49,7 +49,7 @@ def main():
 		elif opt in ("-v", "--version"):
 			mantis_version = val
 
-		elif opt == "--suffix":
+		elif opt in ("-s", "--suffix"):
 			version_suffix = val
 
 	if len(args) < 1:

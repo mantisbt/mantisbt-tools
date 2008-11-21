@@ -122,11 +122,20 @@ def main():
 				"web.config"
 				) else False
 
-	for root, dirs, files in os.walk(release_dir):
+	def custom_dirs(name):
+		return True if name in (
+				"packages"
+				) else False
+
+	for root, dirs, files in os.walk(release_dir, topdown=False):
 		files = filter(custom_files, files)
+		dirs = filter(custom_dirs, dirs)
 		for name in files:
 			print "  " + path.join(root,name)
 			os.remove(path.join(root, name))
+		for name in dirs:
+			print "  " + path.join(root,name) + "/"
+			os.system("rm -rf %s"%path.join(root, name))
 
 	# Build documentation for release	
 	if build_docbook:

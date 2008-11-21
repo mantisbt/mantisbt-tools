@@ -103,7 +103,7 @@ def main():
 	refs = [ref for ref in branches + tags if not ignore(ref)]
 
 	# Regex to strip 'origin/' from ref names
-	refnameregex = re.compile('(?:origin/)?(.*)')
+	refnameregex = re.compile('(?:[a-zA-Z0-9-.]+/)?(.*)')
 	
 	# For each ref, checkout and call docbook-manual.py, tracking last build timestamp
 	# to prevent building a manual if there have been no commits since last build

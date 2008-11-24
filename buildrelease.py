@@ -146,19 +146,19 @@ def main():
 	print "Creating release tarballs..."
 
 	os.chdir(release_path)
-	os.system("tar czf %s.tgz %s"%(release_name, release_name))
+	os.system("tar czf %s.tar.gz %s"%(release_name, release_name))
 	os.system("zip -rq %s.zip %s"%(release_name, release_name))
 
 	# Generate checksums
 	print "Generating checksums..."
 
-	tar_md5 = os.popen("md5sum --binary %s.tgz"%(release_name)).read()
-	tar_sha1 = os.popen("sha1sum --binary %s.tgz"%(release_name)).read()
+	tar_md5 = os.popen("md5sum --binary %s.tar.gz"%(release_name)).read()
+	tar_sha1 = os.popen("sha1sum --binary %s.tar.gz"%(release_name)).read()
 
 	zip_md5 = os.popen("md5sum --binary %s.zip"%(release_name)).read()
 	zip_sha1 = os.popen("sha1sum --binary %s.zip"%(release_name)).read()
 
-	f = open("%s.tgz.digests"%release_name, 'w')
+	f = open("%s.tar.gz.digests"%release_name, 'w')
 	f.write("%s\n%s\n"%(tar_md5, tar_sha1))
 	f.close()
 

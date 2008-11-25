@@ -62,6 +62,9 @@ def main():
 	if len(args) > 1:
 		mantis_path = args[1]
 
+	# 'Standard' umask
+	old_umask = os.umask( 0002 )
+
 	# Check paths
 	if not path.isdir(release_path):
 		print "Creating release path..."
@@ -101,7 +104,7 @@ def main():
 		print "Error: release path already contains %s."%(release_name)
 		sys.exit(3)
 
-	os.system("rsync -a --exclude=.git %s/ %s"%(mantis_path, release_dir))
+	os.system("rsync -rltD --exclude=.git %s/ %s"%(mantis_path, release_dir))
 
 	# Apply version suffix
 	if version_suffix:
@@ -180,6 +183,9 @@ def main():
 			for name in dirs:
 				os.rmdir(path.join(root, name))
 		os.rmdir(release_dir)
+
+	# Restore previous umask
+	os.umask( old_umask )
 	
 	print "Done!"
 

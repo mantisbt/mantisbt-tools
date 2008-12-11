@@ -116,19 +116,25 @@ def main():
 	print "Removing custom files from release path..."
 
 	def custom_files(name):
-		return True if name in (
+		if name in (
 				"config_inc.php",
 				"custom_constant_inc.php",
 				"custom_strings_inc.php",
 				"custom_functions_inc.php",
 				"mantis_offline.php",
 				"web.config"
-				) else False
+				):
+			return True
+		else:
+			return False
 
 	def custom_dirs(name):
-		return True if name in (
+		if name in (
 				"packages"
-				) else False
+				):
+			return True
+		else:
+			return False
 
 	for root, dirs, files in os.walk(release_dir, topdown=False):
 		files = filter(custom_files, files)

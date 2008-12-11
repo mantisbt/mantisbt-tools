@@ -73,10 +73,10 @@ def main():
 		elif opt in ("-d", "--docbook"):
 			pass_opts += " -d"
 
-		elif opt == "--auto-suffix":
+		elif opt in ("-a", "--auto-suffix"):
 			auto_suffix = True
 
-		elif opt == "--suffix":
+		elif opt in ("-s", "--suffix"):
 			version_suffix = val
 
 	if len(args) < 1:

@@ -91,9 +91,11 @@ def main():
 
 	os.chdir(repo_path)
 
+	# Update the repository
+	os.system('git fetch')
+
 	# Consolidate refs/branches
 	if all_branches:
-		os.system('git fetch')
 		os.system('git remote prune origin')
 		refs.extend(os.popen('git branch -r').read().split())
 

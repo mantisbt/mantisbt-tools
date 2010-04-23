@@ -5,6 +5,8 @@ from os import path
 
 import getopt
 import re
+import shutil
+import tempfile
 
 # Absolute path to buildrelease.py
 buildscript = path.dirname(path.abspath(__file__)) + '/buildrelease.py'
@@ -16,12 +18,14 @@ ignorelist = map(re.compile, [
 			])
 
 # Script options
-options = "hr:bacds:"
-long_options = [ "help", "ref=", "branches", "auto-suffix", "clean", "docbook", "suffix=" ]
+options = "hfr:bacds:"
+long_options = [ "help", "fresh", "ref=", "branches", "auto-suffix", "clean", "docbook", "suffix=" ]
 
 def usage():
 	print '''Usage: buildrelease-repo [options] /path/for/tarballs [/path/to/repo]
 Options:  -h | --help                  Show this usage message
+
+          -f | --fresh                 Create a fresh clone at repository path, or temporary path
           -r | --ref <ref>[,<ref>...]  Build a release for named refs <ref>
           -b | --branches              Build a release for all branches
           -a | --auto-suffix           Automatically append the Git hash to the version suffix
@@ -55,11 +59,16 @@ def main():
 	all_branches = False
 	version_suffix = ""
 	auto_suffix = False
+	fresh_clone = False
+	delete_clone = False
 
 	for opt, val in opts:
 		if opt in ("-h", "--help"):
 			usage()
 			sys.exit(0)
+
+		elif opt in ("-f", "--fresh"):
+			fresh_clone = True
 
 		elif opt in ("-r", "--ref"):
 			refs.extend(val.split(","))
@@ -89,6 +98,14 @@ def main():
 	if len(args) > 1:
 		repo_path = args[1]
 
+	# Create a new repo clone
+	if fresh_clone:
+		if repo_path == ".":
+			repo_path = tempfile.mkdtemp(prefix="mantisbt-", suffix=".git")
+			delete_clone = True
+		os.system('git clone git://mantisbt.org/mantisbt.git %s' % (repo_path))
+
+	# Change to the repo path
 	os.chdir(repo_path)
 
 	# Update the repository
@@ -132,6 +149,11 @@ def main():
 
 		# Start building
 		os.system("%s %s %s %s %s"%(buildscript, pass_opts, suffix, release_path, repo_path))
+
+	# Cleanup temporary repo if needed
+	if delete_clone:
+		print "\nRemoving temporary clone."
+		shutil.rmtree(repo_path)
 
 	# Done
 	print "\nAll builds completed."

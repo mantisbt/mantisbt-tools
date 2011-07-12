@@ -103,7 +103,7 @@ def main():
 		if repo_path == ".":
 			repo_path = tempfile.mkdtemp(prefix="mantisbt-", suffix=".git")
 			delete_clone = True
-		os.system('git clone git://mantisbt.org/mantisbt.git %s' % (repo_path))
+		os.system('git clone git://github.com/mantisbt/mantisbt.git %s' % (repo_path))
 
 	# Change to the repo path
 	os.chdir(repo_path)

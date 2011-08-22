@@ -117,6 +117,7 @@ def main():
 
 	def custom_files(name):
 		if name in (
+				".gitignore",
 				"config_inc.php",
 				"custom_constant_inc.php",
 				"custom_strings_inc.php",

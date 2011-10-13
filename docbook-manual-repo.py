@@ -15,17 +15,19 @@ manualscript = path.dirname(path.abspath(__file__)) + '/docbook-manual.py'
 # Regular expressions of refs to ignore
 ignorelist = map(re.compile, [
             'HEAD',
+            '->',
             '-1\.0\.[\w\d]+',
             '-1\.1\.[\w\d]+'
             ])
 
 # Script options
-options = "hfda"
-long_options = [ "help", "force", "delete", "all", "pdf", "html", "release" ]
+options = "hr:fda"
+long_options = [ "help", "ref=", "force", "delete", "all", "pdf", "html", "release" ]
 
 def usage():
     print '''Usage: docbook-manual-repo /path/to/mantisbt/repo /path/to/install [<lang> ...]
     Options:  -h | --help           Print this usage message
+              -r | --ref            Select what refs to build
               -f | --force          Ignore timestamps and force building
               -d | --delete         Delete install directories before building
                    --html           Build HTML manual
@@ -53,6 +55,7 @@ def main():
         usage()
         sys.exit(2)
 
+    refs = None
     force = False
     pass_opts = ""
 
@@ -60,6 +63,9 @@ def main():
         if opt in ("-h", "--help"):
             usage()
             sys.exit(0)
+
+        elif opt in ("-r", "--ref"):
+            refs = val.split(",")
 
         elif opt in ("-f", "--force"):
             force = True
@@ -95,12 +101,13 @@ def main():
     os.system('git fetch')
     os.system('git remote prune origin')
 
-    # List refs from remote branches and tags
-    branches = os.popen('git branch -r').read().split()
-    tags = os.popen('git tag -l').read().split()
+    if refs is None:
+        # List refs from remote branches and tags
+        branches = os.popen('git branch -r').read().split()
+        tags = os.popen('git tag -l').read().split()
 
-    # Filter refs using ignore()
-    refs = [ref for ref in branches + tags if not ignore(ref)]
+        # Filter refs using ignore()
+        refs = [ref for ref in branches + tags if not ignore(ref)]
 
     # Regex to strip 'origin/' from ref names
     refnameregex = re.compile('(?:[a-zA-Z0-9-.]+/)?(.*)')

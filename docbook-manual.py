@@ -75,6 +75,9 @@ def main():
         if dir == '.svn' or dir == 'template':
             continue
 
+        if not path.isdir( dir ):
+            continue
+
         if len(languages) > 0:
             langs = languages
         else:

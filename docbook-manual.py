@@ -75,7 +75,7 @@ def main():
         if dir == '.svn' or dir == 'template':
             continue
 
-        if not path.isdir( dir ):
+        if not path.isdir( path.join( docroot, dir ) ):
             continue
 
         if len(languages) > 0:

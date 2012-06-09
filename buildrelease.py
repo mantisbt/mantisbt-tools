@@ -159,6 +159,12 @@ def main():
     os.system("tar czf %s.tar.gz %s"%(release_name, release_name))
     os.system("zip -rq %s.zip %s"%(release_name, release_name))
 
+    # Sign tarballs
+    print "Signing tarballs"
+
+    os.system("gpg -b -a %s.tar.gz"%(release_name))
+    os.system("gpg -b -a %s.zip"%(release_name))
+
     # Generate checksums
     print "Generating checksums..."
 

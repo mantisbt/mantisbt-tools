@@ -43,11 +43,11 @@ rm -r $TO_DELETE
 echo
 
 echo "Converting line endings to Unix format"
-find . -type f -print0 |xargs -0 dos2unix
+find . -type f ! -path "./.git*" -print0 |xargs -0 dos2unix
 echo
 
 echo "Removing trailing whitespace"
-find . -type f -print0 |xargs -0 sed -i.bak -e 's/[ \t]*$//'
+find . -type f ! -path "./.git*" -print0 |xargs -0 sed -i.bak -e 's/[ \t]*$//'
 
 # Removing backup files if sed execution successful
 if [ $? -eq 0 ]

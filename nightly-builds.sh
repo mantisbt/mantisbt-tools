@@ -14,8 +14,8 @@
 # Parameters (edit variables as appropriate)
 #
 
-# List of branches to process
-branches='master-1.2.x master'
+# Comma-delimited list of branches to process
+branches='master-1.2.x,master'
 
 # Where to save the builds
 pathBuilds=/srv/www/builds
@@ -32,23 +32,24 @@ logfile=/var/log/$(basename $0 .sh).log
 # Main
 #
 
-today=`date +"%F %T"`
-
 # Create target directory if it does not exist
 if [ ! -d $pathBuilds ]
 then
 	mkdir -p $pathBuilds 2>&1 || exit 1
 fi
 
-for b in $branches
-do
-	echo "
-------------------------------------------------------------------------
-$today - Build release tarball for '$b' branch
-"
-	$pathTools/buildrelease-repo.py --auto-suffix --ref origin/$b --fresh --docbook $pathBuilds 2>&1
-	echo
-done >>$logfile
+# Start logging
+cat <<-EOF >>$logfile
+
+	------------------------------------------------------------------------
+	$(date +"%F %T") - Building release tarballs
+
+EOF
+
+# Build the tarballs
+refList=$(eval echo origin/{$branches})
+$pathTools/buildrelease-repo.py --auto-suffix --ref ${refList/ /,} --fresh --docbook $pathBuilds >>$logfile 2>&1
+echo >>$logfile
 
 echo "Deleting old builds" >>$logfile
 find $pathBuilds -mtime +1 -print -delete >>$logfile

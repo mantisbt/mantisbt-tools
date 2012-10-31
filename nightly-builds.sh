@@ -20,12 +20,18 @@ branches='master-1.2.x,master'
 # Where to save the builds
 pathBuilds=/srv/www/builds
 
+# Number of nightly builds to keep available for download
+numToKeep=2
+
 # Location of release build scripts
 pathTools=$(dirname $(readlink -e $0))
 
 # Log file - set to /dev/null for no log
 logfile=/var/log/$(basename $0 .sh).log
 #logfile=/dev/null
+
+# Key extension used to determine old releases to delete
+keyExt='.zip'
 
 
 #------------------------------------------------------------------------------
@@ -51,5 +57,25 @@ refList=$(eval echo origin/{$branches})
 $pathTools/buildrelease-repo.py --auto-suffix --ref ${refList/ /,} --fresh --docbook $pathBuilds >>$logfile 2>&1
 echo >>$logfile
 
-echo "Deleting old builds" >>$logfile
-find $pathBuilds -mtime +1 -print -delete >>$logfile
+
+# Delete old nightly builds
+echo "Keeping only the most recent $numToKeep" >>$logfile
+cd $pathBuilds
+for branch in ${branches/,/ }
+do
+	echo "  Processing '$branch' branch"
+	# List files by date, grep for branch with shortened MD5 pattern and key
+	# extension, and use tail to keep desired number
+	ls -t | grep -P "$branch-[0-9a-f]{7}$keyExt$" | tail -n +$(($numToKeep + 1)) |
+	while read build
+	do
+		fileSpec=$(basename $build $keyExt)
+		echo "    Deleting files for $fileSpec"
+		rm -r $fileSpec*
+	done
+done >>$logfile
+echo >>$logfile
+
+
+# All done !
+echo "$(date +'%F %T') Build complete !" >>$logfile

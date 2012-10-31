@@ -98,7 +98,7 @@ def main():
     # Copy to release path, removing custom files
     release_dir = path.join(release_path, release_name)
 
-    print "Building release '%s' in path '%s'"%(release_name, release_dir)
+    print "\nBuilding release '%s' in path '%s'"%(release_name, release_dir)
 
     if path.exists(release_dir):
         print "Error: release path already contains %s."%(release_name)
@@ -200,7 +200,7 @@ def main():
     # Restore previous umask
     os.umask( old_umask )
 
-    print "Done!"
+    print "Done!\n"
 
 #end main()
 

@@ -1,21 +1,54 @@
 #!/bin/bash
+#------------------------------------------------------------------------------
+#
+# nightly-builds.sh
+#
+# This script is intended to be scheduled for daily execution in cron, and
+# will build the release tar/zipballs and make them available for download
+# in the specified path.
+#
+#------------------------------------------------------------------------------
 
-#pushd /srv/mantisbt-tools > /dev/null
-#git pull --rebase > /dev/null 2>&1
-#popd > /dev/null
+
+#------------------------------------------------------------------------------
+# Parameters (edit variables as appropriate)
+#
+
+# List of branches to process
+branches='master-1.2.x master'
+
+# Where to save the builds
+pathBuilds=/srv/www/builds
+
+# Location of release build scripts
+pathTools=$(dirname $(readlink -e $0))
+
+# Log file - set to /dev/null for no log
+logfile=/var/log/$(basename $0 .sh).log
+#logfile=/dev/null
+
+
+#------------------------------------------------------------------------------
+# Main
+#
 
 today=`date +"%F %T"`
 
-logfile=/dev/null
-
-branches='master-1.2.x master'
+# Create target directory if it does not exist
+if [ ! -d $pathBuilds ]
+then
+	mkdir -p $pathBuilds 2>&1 || exit 1
+fi
 
 for b in $branches
 do
-        echo '---------------------------------------------------------------' >>$logfile
-        echo "$today - Build release tarball for '$b'" >>$logfile
-        /srv/mantisbt-tools/buildrelease-repo.py --auto-suffix --ref origin/$b --fresh --docbook /srv/www/builds >>$logfile 2>&1
-done
+	echo "
+------------------------------------------------------------------------
+$today - Build release tarball for '$b' branch
+"
+	$pathTools/buildrelease-repo.py --auto-suffix --ref origin/$b --fresh --docbook $pathBuilds 2>&1
+	echo
+done >>$logfile
 
 echo "Deleting old builds" >>$logfile
-find /srv/www/builds -mtime +1 -delete -print >>$logfile
+find $pathBuilds -mtime +1 -print -delete >>$logfile

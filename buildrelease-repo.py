@@ -131,6 +131,7 @@ def main():
     refnameregex = re.compile('(?:[a-zA-Z0-9-.]+/)?(.*)')
 
     for ref in refs:
+        sys.stdout.flush()
         os.system("git checkout -f %s"%(ref))
 
         # Handle suffix/auto-suffix generation
@@ -148,7 +149,9 @@ def main():
             suffix = "--suffix %s"%version_suffix
 
         # Start building
+        sys.stdout.flush()
         os.system("%s %s %s %s %s"%(buildscript, pass_opts, suffix, release_path, repo_path))
+
 
     # Cleanup temporary repo if needed
     if delete_clone:

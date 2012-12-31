@@ -26,7 +26,7 @@ fi
 # Regular expressions
 REGEX_MANTISBT="Copyright .*[0-9]{4} +MantisBT Team"
 REGEX_SOAP_API="Copyright .*[0-9]{4} +Victor Boctor"
-REGEX_DOCS="<year>[0-9]{4}<\/year>"
+REGEX_DOCS='<year>[0-9]{4}<\/year>|<!ENTITY YEAR "[0-9]{4}">'
 
 # Determine copyright year based on reference file
 COPYRIGHT_YEAR_OLD=$(sed -rn "/$REGEX_MANTISBT/ s/^.*- *([0-4]{4}) .*$/\1/p" $REF_FILE)

@@ -11,71 +11,106 @@
 	$lang_files = array();
 	$english_strings = array();
 	# - ---
-	define( LF_ONLY,		0 );
-	define( CR_ONLY,		1 );
-	define( CRLF_ONLY,		2 );
-	define( LFCR_MIXED,		3 );
-	define( LFCRLF_MIXED,	4 );
-	define( CRLFCR_MIXED,	5 );
-	define( CRLFCRLF_MIXED,	6 );
+	define( 'LF_ONLY',        0 );
+	define( 'CR_ONLY',        1 );
+	define( 'CRLF_ONLY',      2 );
+	define( 'LFCR_MIXED',     3 );
+	define( 'LFCRLF_MIXED',   4 );
+	define( 'CRLFCR_MIXED',   5 );
+	define( 'CRLFCRLF_MIXED', 6 );
 	# - ---
 	function print_result( $p_result ) {
 		switch( $p_result ) {
-			case CRLF_ONLY:	echo "*** Windows Format\n";
+			case CRLF_ONLY:
+				$format = "*** Windows";
 				break;
-			case CR_ONLY:	echo "*** Mac Format\n";
+			case CR_ONLY:
+				$format = "*** Mac";
 				break;
-			case LF_ONLY:	echo "UNIX Format\n";
+			case LF_ONLY:
+				$format =  "UNIX";
 				break;
-			case LFCR_MIXED:	echo "### Mixed Format: LF and CR\n";
+			case LFCR_MIXED:
+				$format =  "### Mixed (LF and CR)";
 				break;
-			case LFCRLF_MIXED:	echo "### Mixed Format: LF and CRLF\n";
+			case LFCRLF_MIXED:
+				$format =  "### Mixed (LF and CRLF)";
 				break;
-			case CRLFCR_MIXED:	echo "### Mixed Format: CRLF and CR\n";
+			case CRLFCR_MIXED:
+				$format =  "### Mixed (CRLF and CR)";
 				break;
-			case CRLFCRLF_MIXED:echo "### Mixed Format: CRLF and CR and LF\n";
+			case CRLFCRLF_MIXED:
+				$format =  "### Mixed (CRLF and CR and LF)";
 				break;
 		}
+		echo "$format Format";
 	}
+
 	# - ---
 	# read in all files
-	function process_files( $p_dir ) {
-		$cwd = getcwd();
-		$cwd .= DIRECTORY_SEPARATOR.$p_dir;
+	function process_files( $p_dir, $p_rewrite = false ) {
+		$back = $cwd = getcwd();
+		$cwd .= DIRECTORY_SEPARATOR . $p_dir;
 		chdir( $cwd );
+
 		if ( $handle = opendir( $cwd ) ) {
-			echo "Directory: ".getcwd()."\n";
+
+			# Get directory's contents
+			#echo "Directory: " . getcwd() . "\n";
 			$file_arr = array();
-		    while (false !== ( $file = readdir( $handle ) )) {
-		    	$file_arr[] = $file;
+			while (false !== ( $file = readdir( $handle ) )) {
+				$file_arr[] = $file;
 			}
-		    closedir( $handle );
-		    foreach( $file_arr as $file ) {
-		    	#echo "file: $file\n";
-				if (( '.' == $file )||( '..' == $file )||( 'CVS' == $file ) || ereg('\.(jpg|gif|png|zip)$', $file)) {
-					continue;
+			closedir( $handle );
+
+			# Process the files
+			foreach( $file_arr as $file ) {
+				#echo "file: $file\n";
+
+				# Exclusions - continue to next file if match
+				switch( $file ) {
+
+					# File names
+					case '.':
+					case '..':
+					case '.git':
+						continue 2;
+
+					default:
+						# File extensions
+						if( preg_match( '/\.(jpg|gif|png|zip)$/', $file ) ) {
+							continue 2;
+						}
 				}
-			    if ( TRUE == is_dir( $file ) ) {
-			    	# directory
-					process_files( $file );
-			    } else {
-			    	echo "Processing: ".getcwd().DIRECTORY_SEPARATOR.$file."";
-			    	$result = check_lineterm( $file );
-			    	echo "\n";
-			    	if ( LF_ONLY != $result ) {
+
+				if( is_dir( $file ) ) {
+					# Recurse
+					process_files( $file, $p_rewrite );
+				} else {
+					$filepath = $cwd . DIRECTORY_SEPARATOR . $file;
+					$result = check_lineterm( $filepath );
+					if( LF_ONLY != $result ) {
+						echo $filepath . ": ";
 						print_result( $result );
+						if( $p_rewrite ) {
+							echo " - ";
+							rewrite_file( $filepath );
+						}
+						echo "\n";
 					}
-			    }
-		    }
+				}
+			}
 		}
-		chdir( '..' );
+		chdir( $back );
 	}
+
 	# - ---
 	function rewrite_file( $p_file ) {
+		echo "rewriting";
 		$strings = file( $p_file );
 		$fp = fopen( $p_file, 'wb' );
 		foreach( $strings as $string ) {
-			fwrite( $fp, rtrim($string)."\n" );
+			fwrite( $fp, rtrim($string) . "\n" );
 		}
 		fclose( $fp );
 	}
@@ -133,35 +168,7 @@
 			return CRLFCRLF_MIXED;
 		}
 	}
-	# - ---
-	# read in all files
-	function process_files_rewrite( $p_dir ) {
-		$cwd = getcwd();
-		$cwd .= DIRECTORY_SEPARATOR.$p_dir;
-		chdir( $cwd );
-		if ( $handle = opendir( $cwd ) ) {
-			echo "Directory: ".getcwd()."\n";
-			$file_arr = array();
-		    while (false !== ( $file = readdir( $handle ) )) {
-		    	$file_arr[] = $file;
-			}
-		    closedir( $handle );
-		    foreach( $file_arr as $file ) {
-				if (( '.' == $file )||( '..' == $file )||( 'CVS' == $file ) || ereg('\.(jpg|gif|png|zip)$', $file)) {
-					continue;
-				}
-			    if ( TRUE == is_dir( $file ) ) {
-			    	# directory
-					process_files_rewrite( $file );
-			    } else {
-			    	echo "Processing: ".getcwd().DIRECTORY_SEPARATOR.$file."";
-					rewrite_file( getcwd().DIRECTORY_SEPARATOR.$file );
-					echo "\n";
-			    }
-		    }
-		}
-		chdir( '..' );
-	}
+
 	# - ---
 	function print_usage() {
 		echo "\nUsage:\n        php -q check_lineterm.php <option> <path/folder>\n        -c check files\n        -f fix file\n        -a fix all files\n";
@@ -178,17 +185,26 @@
 		exit;
 	}
 
-	if ( '-c' == $argv[1] ) {
-		if ( isset( $argv[2] ) ) {
-			process_files( $argv[2] );
-		} else {
-			process_files( '.' );
-		}
-	} else if ( '-f' == $argv[1] ) {
-		rewrite_file( $argv[2] );
-	} else if ( '-a' == $argv[1] ) {
-		process_files_rewrite( $argv[2] );
-	} else {
-		print_usage();
+	$path = isset( $argv[2] ) ? $argv[2] : '.';
+
+	echo "Processing, please wait...\n";
+	switch( $argv[1] ) {
+		case '-c':
+			process_files( $path );
+			break;
+		case '-a':
+			process_files( $path, true );
+			break;
+		case '-f':
+			if( $path != '.' ) {
+				echo realpath( $argv[2] ) . ": ";
+				rewrite_file( $argv[2] );
+				echo "\n";
+				break;
+			}
+		default:
+			print_usage();
+			exit;
 	}
+	echo "Done\n";
 ?>

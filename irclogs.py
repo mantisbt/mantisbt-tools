@@ -93,65 +93,9 @@ def wwwUpdate (pathSource, pathTarget):
     print
 
 
-def createIndex (dir, channels):
-    # Create index file
-    fileName = os.path.join(dir, 'test.html')
-    print "Generating index page %s " % fileName
-
-    try:
-        fileIndex = open(fileName, 'w');
-    except IOError as e:
-        raise Error("cannot open %s for writing: %s" % (fileName, e))
-
-    # Write file contents
-    try:
-        # Header
-        print >>fileIndex, """\
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
-
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <title>%(title)s</title>
-  <link rel="stylesheet" type="text/css" href="../css/mantis.css" />
-</head>
-
-<body>
-  <div>
-"""
-
-        # Body
-        for channel in channels:
-            if channels[channel]:
-                print >>fileIndex, '<div>%s' % channel
-                for subdir in channels[channel]:
-                    print >>fileIndex, '<div><a href="%s">#%s</a> <a href="%s">latest log</a></div>' % \
-                        (channel + '/' + subdir, subdir, channel + '/' + subdir + '/latest.log.html')
-                print >>fileIndex, '</div>'
-            else:
-                print >>fileIndex, '<a href="%s">#%s</a> <a href="%s">latest log</a>' % \
-                    (channel, channel, channel + '/latest.log.html')
-
-        # Footer
-        print >>fileIndex, """\
-  </div>
-</body>
-
-</html>
-"""
-
-    finally:
-        fileIndex.close()
-
-    print "Index file creation complete"
-
-
-
 # ---------------------------------------------------------------------
 
 pathSource = os.path.abspath(pathSource)
 pathTarget = os.path.abspath(pathTarget)
-channels = convertLogs(pathSource)
+convertLogs(pathSource)
 wwwUpdate(pathSource, pathTarget)
-#createIndex(pathTarget, channels)

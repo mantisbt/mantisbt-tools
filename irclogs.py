@@ -23,6 +23,15 @@ strRegexChannel = '(?:mantis)'
 
 # ---------------------------------------------------------------------
 
+def checkPath (p):
+    """ Converts path to absolute and check that it exists """
+    p = os.path.abspath(p)
+    if not path.isdir(p):
+        print "ERROR: %s is not a directory" % p
+        exit(1)
+    return p
+
+
 def runLogs2html (channel, dirName):
     """ Runs the Log2html script for specified directory if the most
     recent log file does not have a corresponding and up-to-date
@@ -95,7 +104,8 @@ def wwwUpdate (pathSource, pathTarget):
 
 # ---------------------------------------------------------------------
 
-pathSource = os.path.abspath(pathSource)
-pathTarget = os.path.abspath(pathTarget)
+pathSource = checkPath(pathSource)
+pathTarget = checkPath(pathTarget)
+
 convertLogs(pathSource)
 wwwUpdate(pathSource, pathTarget)

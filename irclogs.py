@@ -86,7 +86,7 @@ def convertLogs (pathSource):
 
 def wwwUpdate (pathSource, pathTarget):
     """ Copies the generated html pages to the web server """
-    rsync = "rsync -av --delete --exclude=*.log %s/ %s" % (pathSource, pathTarget)
+    rsync = "rsync -av --delete --exclude=*.log --exclude=index.php %s/ %s" % (pathSource, pathTarget)
     print "Running rsync"
     print
     os.system(rsync)

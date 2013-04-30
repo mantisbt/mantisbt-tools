@@ -13,10 +13,10 @@ from datetime import date
 # ---------------------------------------------------------------------
 
 # Directory where ChannelLogger stores the raw IRC logs
-pathSource = './source'
+pathSource = '/home/supybot/mantisbot/logs/ChannelLogger'
 
 # Web server directory from which the html pages are served
-pathTarget = './target'
+pathTarget = '/srv/www/irclogs'
 
 # Regex for IRC logs archives to process
 strRegexChannel = '(?:mantis)'

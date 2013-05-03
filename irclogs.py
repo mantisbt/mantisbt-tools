@@ -4,11 +4,11 @@
 # html pages for the IRC logs
 # Assumes that the dir / log file names do not have a leading '#'
 
+import datetime
 import re
 import os
 import glob
 from os import path
-from datetime import date
 
 # ---------------------------------------------------------------------
 
@@ -22,6 +22,10 @@ pathTarget = '/srv/www/irclogs'
 strRegexChannel = '(?:mantis)'
 
 # ---------------------------------------------------------------------
+
+def log (msg):
+    """ Prints log message with timestamp """
+    print "%s  %s" % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), msg)
 
 def checkPath (p):
     """ Converts path to absolute and check that it exists """
@@ -95,17 +99,21 @@ def convertLogs (pathSource):
 
 def wwwUpdate (pathSource, pathTarget):
     """ Copies the generated html pages to the web server """
+    log("Copying HTML pages to '%s'" % pathTarget)
     rsync = "rsync -av --delete --exclude=*.log --exclude=index.php %s/ %s" % (pathSource, pathTarget)
-    print "Running rsync"
+    print rsync
     print
     os.system(rsync)
     print
 
-
 # ---------------------------------------------------------------------
+
+log('Converting logfiles')
 
 pathSource = checkPath(pathSource)
 pathTarget = checkPath(pathTarget)
 
 convertLogs(pathSource)
 wwwUpdate(pathSource, pathTarget)
+
+log('Completed\n%s' % ('-' * 80))

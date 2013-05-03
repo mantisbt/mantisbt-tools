@@ -7,6 +7,8 @@
 import datetime
 import re
 import os
+import subprocess
+import sys
 import glob
 from os import path
 
@@ -57,7 +59,8 @@ def runLogs2html (channel, dirName):
         msg = "IRC logs of #%s" % channel
         cmd = "logs2html --title='%s' --prefix='%s for ' %s" % (msg, msg, dirName)
         print "generating html - %s" % cmd
-        os.system(cmd)
+        # Execute logs2html, redirect stderr to stdout for logging purposes
+        subprocess.check_call(cmd, shell=True, stderr=sys.stdout.fileno())
 
 
 def convertLogs (pathSource):
@@ -103,8 +106,9 @@ def wwwUpdate (pathSource, pathTarget):
     rsync = "rsync -av --delete --exclude=*.log --exclude=index.php %s/ %s" % (pathSource, pathTarget)
     print rsync
     print
-    os.system(rsync)
-    print
+    retCode = subprocess.call(rsync, shell=True)
+    if retCode != 0:
+        log('ERROR: rsync call failed with exit code %i' % retCode)
 
 # ---------------------------------------------------------------------
 

@@ -15,84 +15,91 @@ from os import path
 # ---------------------------------------------------------------------
 
 # Directory where ChannelLogger stores the raw IRC logs
-pathSource = '/home/supybot/mantisbot/logs/ChannelLogger'
+source = '/home/supybot/mantisbot/logs/ChannelLogger'
 
 # Web server directory from which the html pages are served
-pathTarget = '/srv/www/irclogs'
+target = '/srv/www/irclogs'
 
 # Regex for IRC logs archives to process
-strRegexChannel = '(?:mantis)'
+regexstr_channel = '(?:mantis)'
 
 # ---------------------------------------------------------------------
 
-def log (msg):
-    """ Prints log message with timestamp """
-    print "%s  %s" % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), msg)
 
-def checkPath (p):
+def log(msg):
+    """ Prints log message with timestamp """
+    print "%s  %s" % (
+        datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        msg
+    )
+
+
+def check_path(p):
     """ Converts path to absolute and check that it exists """
-    p = os.path.abspath(p)
+    p = path.abspath(p)
     if not path.isdir(p):
         print "ERROR: %s is not a directory" % p
         exit(1)
     return p
 
 
-def runLogs2html (channel, dirName):
+def run_logs2html(channel, dir_name):
     """ Runs the Log2html script for specified directory if the most
     recent log file does not have a corresponding and up-to-date
     html file"""
 
     # Get most recent log file
-    pathRecentLog = max(glob.glob(path.join(dirName, '*.log')))
-    pathRecentHtml = pathRecentLog + '.html'
+    path_recent_log = max(glob.glob(path.join(dir_name, '*.log')))
+    path_recent_html = path_recent_log + '.html'
 
     # Check that html file corresponding to most recent log
     # exists and is actually more recent than the log file
     if (
-        os.path.exists(pathRecentHtml) and
-        os.path.getmtime(pathRecentLog) <= os.path.getmtime(pathRecentHtml)
-    ):
-        print "up-to-date html exists for newest log file %s" % \
-            path.basename(pathRecentLog)
+            path.exists(path_recent_html) and
+            path.getmtime(path_recent_log) <= path.getmtime(path_recent_html)):
+        print "up-to-date html exists for newest log file %s" % (
+            path.basename(path_recent_log)
+        )
     else:
         msg = "IRC logs of #%s" % channel
-        cmd = "logs2html --title='%s' --prefix='%s for ' %s" % (msg, msg, dirName)
+        cmd = "logs2html --title='%s' --prefix='%s for ' %s" % (
+            msg, msg, dir_name
+        )
         print "generating html - %s" % cmd
         # Execute logs2html, redirect stderr to stdout for logging purposes
         subprocess.check_call(cmd, shell=True, stderr=sys.stdout.fileno())
 
 
-def convertLogs (pathSource):
+def convert_logs(source):
     """ Process source path, convert all logs to html """
 
     # Building a list of channels to generate index page later
     channels = dict()
 
-    # The directories in pathSource are our logged channels
-    for channel in os.walk(pathSource).next()[1]:
-        pathSrcChan = path.join(pathSource, channel)
+    # The directories in source are our logged channels
+    for channel in os.walk(source).next()[1]:
+        path_src_channel = path.join(source, channel)
         channels[channel] = set()
 
         # Skip if channel not matching spec
-        regexChannel = re.compile(strRegexChannel)
-        if not regexChannel.match(channel):
+        regex_channel = re.compile(regexstr_channel)
+        if not regex_channel.match(channel):
             continue
 
         print "Processing channel #%s " % channel
 
         # Check for presence of subdirectories
-        dirList = frozenset(os.walk(pathSrcChan).next()[1])
-        if dirList:
+        dirlist = frozenset(os.walk(path_src_channel).next()[1])
+        if dirlist:
             # Found some (directories.timestamp is True), process them
-            for subdir in dirList:
+            for subdir in dirlist:
                 channels[channel].add(subdir)
                 print "\t%s:" % subdir,
-                runLogs2html(channel, path.join(pathSrcChan, subdir))
+                run_logs2html(channel, path.join(path_src_channel, subdir))
         else:
-            # Empty dirList = no dir rotation setup, all files are here
+            # Empty dirlist = no dir rotation setup, all files are here
             print "\t",
-            runLogs2html(channel, pathSrcChan)
+            run_logs2html(channel, path_src_channel)
 
     print "html files generation completed"
     print
@@ -100,24 +107,26 @@ def convertLogs (pathSource):
     return channels
 
 
-def wwwUpdate (pathSource, pathTarget):
+def www_update(source, target):
     """ Copies the generated html pages to the web server """
-    log("Copying HTML pages to '%s'" % pathTarget)
-    rsync = "rsync -av --delete --exclude=*.log %s/ %s" % (pathSource, pathTarget)
+    log("Copying HTML pages to '%s'" % target)
+    rsync = "rsync -av --delete --exclude=*.log %s/ %s" % (
+        source, target
+    )
     print rsync
     print
-    retCode = subprocess.call(rsync, shell=True)
-    if retCode != 0:
-        log('ERROR: rsync call failed with exit code %i' % retCode)
+    exitcode = subprocess.call(rsync, shell=True)
+    if exitcode != 0:
+        log('ERROR: rsync call failed with exit code %i' % exitcode)
 
 # ---------------------------------------------------------------------
 
 log('Converting logfiles')
 
-pathSource = checkPath(pathSource)
-pathTarget = checkPath(pathTarget)
+source = check_path(source)
+target = check_path(target)
 
-convertLogs(pathSource)
-wwwUpdate(pathSource, pathTarget)
+convert_logs(source)
+www_update(source, target)
 
 log('Completed\n%s' % ('-' * 80))

@@ -3,40 +3,47 @@
 # Integrates with docbook-manual.py to build manuals for all tagged
 # versions and development branches in the Git repo
 
-import os, sys
-from os import path
 
 import getopt
+import os
+from os import path
 import re
+import sys
 
 # Absolute path to docbook-manual.py
 manualscript = path.dirname(path.abspath(__file__)) + '/docbook-manual.py'
 
 # Regular expressions of refs to ignore
 ignorelist = map(re.compile, [
-            'HEAD',
-            '->',
-            '-1\.0\.[\w\d]+',
-            '-1\.1\.[\w\d]+'
-            ])
+    'HEAD',
+    '->',
+    '-1\.0\.[\w\d]+',
+    '-1\.1\.[\w\d]+'
+])
 
 # Script options
 options = "hr:fda"
-long_options = [ "help", "ref=", "force", "delete", "all", "pdf", "html", "release" ]
+long_options = ["help", "ref=", "force", "delete",
+                "all", "pdf", "html", "release"]
+
 
 def usage():
-    print '''Usage: docbook-manual-repo /path/to/mantisbt/repo /path/to/install [<lang> ...]
+    print '''Usage: docbook-manual-repo /path/to/mantisbt/repo \
+/path/to/install [<lang> ...]
+
     Options:  -h | --help           Print this usage message
               -r | --ref            Select what refs to build
               -f | --force          Ignore timestamps and force building
               -d | --delete         Delete install directories before building
                    --html           Build HTML manual
                    --pdf            Build PDF manual
-                   --release        Build single file types used for release tarballs
+                   --release        Build single file types used for
+                                    release tarballs
               -a | --all            Build all manual types'''
 #end usage()
 
-def ignore( ref ):
+
+def ignore(ref):
     '''Decide which refs to ignore based on regexen listed in 'ignorelist'.
     '''
 
@@ -46,6 +53,7 @@ def ignore( ref ):
             ignore = True
     return ignore
 #end ignore()
+
 
 def main():
     try:
@@ -83,7 +91,7 @@ def main():
             pass_opts += " --pdf"
 
         elif opt == "--release":
-            pass_opst += " --release"
+            pass_opts += " --release"
 
     if len(args) < 2:
         usage()
@@ -113,14 +121,15 @@ def main():
     # Regex to strip 'origin/' from ref names
     refnameregex = re.compile('(?:[a-zA-Z0-9-.]+/)?(.*)')
 
-    # For each ref, checkout and call docbook-manual.py, tracking last build timestamp
-    # to prevent building a manual if there have been no commits since last build
+    # For each ref, checkout and call docbook-manual.py, tracking last build
+    # timestamp to prevent building a manual if there have been no commits
+    # since last build
     for ref in refs:
         print "Generating documentation for '%s'" % ref
 
-        manualpath = installroot.rstrip('/') + '/' + refnameregex.search( ref ).group(1)
+        manualpath = path.join(installroot, refnameregex.search(ref).group(1))
 
-        os.system('git checkout -f %s'%(ref))
+        os.system('git checkout -f %s' % ref)
         lastchange = os.popen('git log --pretty="format:%ct" -n1').read()
 
         buildfile = path.join(manualpath, '.build')
@@ -131,7 +140,12 @@ def main():
             f.close()
 
         if lastchange > lastbuild or force:
-            buildcommand = '%s %s %s %s %s'%(manualscript, pass_opts, path.abspath('docbook'), manualpath, ' '.join(languages))
+            buildcommand = '%s %s %s %s %s' % (
+                manualscript,
+                pass_opts,
+                path.abspath('docbook'),
+                manualpath, ' '.join(languages)
+            )
             print "Calling: " + buildcommand
             if(os.system(buildcommand)):
                 print 'here'

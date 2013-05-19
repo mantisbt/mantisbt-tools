@@ -97,6 +97,7 @@ def main():
         languages = args[2:]
 
     # Update repo from default remote
+    print "Updating repository in '%s' from default remote" % repo
     os.chdir(repo)
     os.system('git fetch')
     os.system('git remote prune origin')
@@ -115,6 +116,8 @@ def main():
     # For each ref, checkout and call docbook-manual.py, tracking last build timestamp
     # to prevent building a manual if there have been no commits since last build
     for ref in refs:
+        print "Generating documentation for '%s'" % ref
+
         manualpath = installroot.rstrip('/') + '/' + refnameregex.search( ref ).group(1)
 
         os.system('git checkout -f %s'%(ref))

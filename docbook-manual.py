@@ -1,9 +1,17 @@
 #!/usr/bin/env python
 
 import os, sys
+import errno
+import glob
+import shutil
+import subprocess
 from os import path
 
 import getopt
+
+# Constants
+MAKE = 'make'
+PUBLICAN = 'publican'
 
 # Script options
 options = "hda"
@@ -27,8 +35,12 @@ def main():
         usage()
         sys.exit(2)
 
+    if len(args) < 2:
+        usage()
+        sys.exit(1)
+
     delete = False
-    types = "html pdf"
+    types = {MAKE: "html pdf", PUBLICAN: "html,pdf"}
 
     for opt, val in opts:
         if opt in ("-h", "--help"):
@@ -39,20 +51,20 @@ def main():
             delete = True
 
         elif opt in ("-a", "--all"):
-            types = "html html_onefile html.tar.gz text pdf ps"
+            types[MAKE] = "html html_onefile html.tar.gz text pdf ps"
+            types[PUBLICAN] = "html,html-desktop,txt,pdf"
 
         elif opt == "--html":
-            types = "html html_onefile html.tar.gz"
+            types[MAKE] = "html html_onefile html.tar.gz"
+            types[PUBLICAN] = "html,html-desktop"
 
         elif opt == "--pdf":
-            types = "pdf"
+            types[MAKE] = "pdf"
+            types[PUBLICAN] = types[MAKE]
 
         elif opt == "--release":
-            types = "html_onefile pdf text"
-
-    if len(args) < 2:
-        usage()
-        sys.exit(1)
+            types[MAKE] = "html_onefile pdf text"
+            types[PUBLICAN] = "html-desktop,pdf,txt"
 
     docroot = args[0]
     installroot = args[1]
@@ -71,29 +83,87 @@ def main():
             for name in dirs:
                 os.rmdir( path.join( root, name ) )
 
-    for dir in os.listdir( docroot ):
+    buildcount = 0
+
+    # Process all existing manuals
+    for dir in os.walk(docroot).next()[1]:
         if dir == '.svn' or dir == 'template':
             continue
 
-        if not path.isdir( path.join( docroot, dir ) ):
-            continue
+        builddir = path.join( docroot, dir )
+        os.chdir( builddir )
 
+        # Languages to process
         if len(languages) > 0:
             langs = languages
         else:
-            langs = os.listdir( path.join( docroot, dir ) )
+            langs = os.walk(builddir).next()[1]
             if langs.count('.svn'):
                 langs.remove('.svn')
+            if langs.count('tmp'):
+                langs.remove('tmp')
 
-        for lang in langs:
-            builddir = path.join( docroot, dir, lang )
-            installdir = path.join( installroot, lang )
+        if path.exists('publican.cfg'):
+            # Build docbook with PUBLICAN
 
-            if path.isdir( builddir ):
-                print "Building manual in " + builddir
+            print "Building manual in '%s'\n" % builddir
+            os.system('publican clean')
+            os.system('publican build --formats=%s --langs=%s' % (types[PUBLICAN], ','.join(langs)))
+
+            print "\nCopying generated manuals to '%s'" % installroot
+            for lang in langs:
+                builddir = path.join('tmp', lang)
+                installdir = path.join(installroot, lang, dir)
+
+                # Create target directory tree
+                try:
+                    os.makedirs(installdir)
+                except OSError as e:
+                    # Ignore file exists error
+                    if e.errno != errno.EEXIST:
+                        raise
+
+                # Copy HTML manuals with rsync
+                rsync = "rsync -a --delete %s %s" % (path.join(builddir, 'html*'), installdir)
+                print rsync
+                retCode = subprocess.call(rsync, shell=True)
+                if retCode != 0:
+                    log('ERROR: rsync call failed with exit code %i' % retCode)
+
+                # Copy PDF and TXT files (if built)
+                for filetype in ['pdf', 'txt']:
+                    for f in glob.glob(path.join(builddir, filetype, '*')):
+                        shutil.copy2(f, installdir)
+
+            os.system('publican clean')
+            print "\nBuild complete\n"
+            buildcount += len(langs)
+        else:
+            # Build docbook with MAKE
+
+            for lang in langs:
+                if not path.isdir(path.join(builddir, lang)):
+                    print "WARNING: Unknown language '%s' in '%s'" % (lang, builddir)
+                    continue
+
+                builddir = path.join( builddir, lang )
+                installdir = path.join( installroot, lang )
                 os.chdir( builddir )
-                os.system( 'make clean %s 2>&1 && make INSTALL_DIR=%s install 2>&1'%(types, installdir) )
+
+                if not path.exists('Makefile'):
+                    continue
+
+                print "Building manual in '%s'\n" % builddir
+                os.system( 'make clean %s 2>&1 && make INSTALL_DIR=%s install 2>&1'%(types[MAKE], installdir) )
                 os.system( 'make clean 2>&1' )
+                print "\nBuild complete\n"
+                buildcount += 1
+
+    # end docbook build loop
+
+    print "Done - %s docbooks built.\n" % buildcount
+
+
 #end main
 
 if __name__ == '__main__':

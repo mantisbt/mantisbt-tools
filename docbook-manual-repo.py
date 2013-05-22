@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python -u
 
 # Integrates with docbook-manual.py to build manuals for all tagged
 # versions and development branches in the Git repo

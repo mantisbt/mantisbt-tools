@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/python -u
 
 # Processes the Supybot ChannelLogger's log directory and generates
 # html pages for the IRC logs

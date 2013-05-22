@@ -56,6 +56,18 @@ def ignore(ref):
 #end ignore()
 
 
+def git_current_branch():
+    ''' Returns the current git branch's name or the current commit SHA
+        if we are in detached HEAD state
+    '''
+    gitcmd = 'git symbolic-ref --quiet --short HEAD || git rev-parse HEAD'
+    return os.popen(gitcmd).read()
+
+
+def git_checkout(branch):
+    os.system('git checkout -f %s' % branch)
+
+
 def main():
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options, long_options)
@@ -122,6 +134,8 @@ def main():
     # Regex to strip 'origin/' from ref names
     refnameregex = re.compile('(?:[a-zA-Z0-9-.]+/)?(.*)')
 
+    curbranch = git_current_branch()
+
     # For each ref, checkout and call docbook-manual.py, tracking last build
     # timestamp to prevent building a manual if there have been no commits
     # since last build
@@ -130,7 +144,8 @@ def main():
 
         manualpath = path.join(installroot, refnameregex.search(ref).group(1))
 
-        os.system('git checkout -f %s' % ref)
+        git_checkout(ref)
+
         # Get timestamp of last change to docbook sources from git
         lastchange = os.popen('git log --pretty="format:%ct" -n1 -- docbook'
                               ).read()
@@ -164,6 +179,12 @@ def main():
                   )
             # 'touch' the flag file to bump the modified time
             os.utime(buildfile, None)
+
+    # Reset repository to originally checked-out branch
+    if curbranch != git_current_branch():
+        print "\nRestoring originally checked-out branch"
+        git_checkout(curbranch)
+
 #end main
 
 if __name__ == '__main__':

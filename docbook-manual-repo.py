@@ -131,7 +131,9 @@ def main():
         manualpath = path.join(installroot, refnameregex.search(ref).group(1))
 
         os.system('git checkout -f %s' % ref)
-        lastchange = os.popen('git log --pretty="format:%ct" -n1').read()
+        # Get timestamp of last change to docbook sources from git
+        lastchange = os.popen('git log --pretty="format:%ct" -n1 -- docbook'
+                              ).read()
 
         buildfile = path.join(manualpath, '.build')
         lastbuild = 0

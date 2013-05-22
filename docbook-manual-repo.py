@@ -9,6 +9,7 @@ import os
 from os import path
 import re
 import sys
+import time
 
 # Absolute path to docbook-manual.py
 manualscript = path.dirname(path.abspath(__file__)) + '/docbook-manual.py'
@@ -125,7 +126,7 @@ def main():
     # timestamp to prevent building a manual if there have been no commits
     # since last build
     for ref in refs:
-        print "Generating documentation for '%s'" % ref
+        print "\nGenerating documentation for '%s'" % ref
 
         manualpath = path.join(installroot, refnameregex.search(ref).group(1))
 
@@ -153,6 +154,14 @@ def main():
             f = open(buildfile, 'w')
             f.write(lastchange)
             f.close()
+        else:
+            # Get last build's timestamp from buildfile's modified time
+            mtime = float(os.path.getmtime(buildfile))
+            print("Docbook source unchanged since last build (%s)" %
+                  time.strftime("%a %Y-%m-%d %H:%M:%S", time.localtime(mtime))
+                  )
+            # 'touch' the flag file to bump the modified time
+            os.utime(buildfile, None)
 #end main
 
 if __name__ == '__main__':

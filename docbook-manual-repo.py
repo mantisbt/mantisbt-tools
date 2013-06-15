@@ -23,8 +23,8 @@ ignorelist = map(re.compile, [
 ])
 
 # Script options
-options = "hr:fda"
-long_options = ["help", "ref=", "force", "delete",
+options = "hr:cfda"
+long_options = ["help", "ref=", "current", "force", "delete",
                 "all", "pdf", "html", "release"]
 
 
@@ -34,6 +34,7 @@ def usage():
 
     Options:  -h | --help           Print this usage message
               -r | --ref            Select what refs to build
+              -c | --current        Build for current branch (no checkout)
               -f | --force          Ignore timestamps and force building
               -d | --delete         Delete install directories before building
                    --html           Build HTML manual
@@ -61,7 +62,7 @@ def git_current_branch():
         if we are in detached HEAD state
     '''
     gitcmd = 'git symbolic-ref --quiet --short HEAD || git rev-parse HEAD'
-    return os.popen(gitcmd).read()
+    return os.popen(gitcmd).read().rstrip()
 
 
 def git_checkout(branch):
@@ -77,6 +78,7 @@ def main():
         sys.exit(2)
 
     refs = None
+    current = False
     force = False
     pass_opts = ""
 
@@ -87,6 +89,9 @@ def main():
 
         elif opt in ("-r", "--ref"):
             refs = val.split(",")
+
+        elif opt in ("-c", "--current"):
+            current = True
 
         elif opt in ("-f", "--force"):
             force = True
@@ -117,13 +122,14 @@ def main():
     if len(sys.argv) > 2:
         languages = args[2:]
 
-    # Update repo from default remote
-    print "Updating repository in '%s' from default remote" % repo
-    os.chdir(repo)
-    os.system('git fetch')
-    os.system('git remote prune origin')
+    if not current:
+        # Update repo from default remote
+        print "Updating repository in '%s' from default remote" % repo
+        os.chdir(repo)
+        os.system('git fetch')
+        os.system('git remote prune origin')
 
-    if refs is None:
+    if not current and refs is None:
         # List refs from remote branches and tags
         branches = os.popen('git branch -r').read().split()
         tags = os.popen('git tag -l').read().split()
@@ -135,16 +141,19 @@ def main():
     refnameregex = re.compile('(?:[a-zA-Z0-9-.]+/)?(.*)')
 
     curbranch = git_current_branch()
+    if current:
+        refs = [curbranch]
 
-    # For each ref, checkout and call docbook-manual.py, tracking last build
-    # timestamp to prevent building a manual if there have been no commits
-    # since last build
+    # For each ref, checkout (unless working on current branch) and call
+    # docbook-manual.py, tracking last build timestamp to prevent
+    # building a manual if there have been no commits since last build
     for ref in refs:
         print "\nGenerating documentation for '%s'" % ref
 
         manualpath = path.join(installroot, refnameregex.search(ref).group(1))
 
-        git_checkout(ref)
+        if not current:
+            git_checkout(ref)
 
         # Get timestamp of last change to docbook sources from git
         lastchange = os.popen('git log --pretty="format:%ct" -n1 -- docbook'
@@ -157,7 +166,7 @@ def main():
             lastbuild = f.read()
             f.close()
 
-        if lastchange > lastbuild or force:
+        if lastchange > lastbuild or force or current:
             buildcommand = '%s %s %s %s %s' % (
                 manualscript,
                 pass_opts,

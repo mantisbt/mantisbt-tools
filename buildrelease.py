@@ -5,6 +5,7 @@ import os
 from os import path
 import re
 import sys
+import tempfile
 
 # Script options
 options = "hcdv:s:"
@@ -12,6 +13,18 @@ long_options = ["help", "clean", "docbook", "version=", "suffix="]
 
 # Absolute path to docbook-manual.py
 manualscript = path.dirname(path.abspath(__file__)) + '/docbook-manual.py'
+
+# List of files and dirs to exclude from the release tarball
+exclude_list = (
+    ".git*",
+    "config_inc.php",
+    "custom_constant_inc.php",
+    "custom_functions_inc.php",
+    "custom_strings_inc.php",
+    "mantis_offline.php",
+    "web.config"
+    "packages"
+    )
 
 
 def usage():
@@ -102,20 +115,35 @@ def main():
 
     # Generate release name
     release_name = 'mantisbt-' + mantis_version
-
     if version_suffix:
         release_name += '-' + version_suffix
 
-    # Copy to release path, removing custom files
+    # Copy to release path, excluding unwanted files
     release_dir = path.join(release_path, release_name)
 
     print "\nBuilding release '%s' in path '%s'" % (release_name, release_dir)
+    print "  Source repository: '%s'\n" % mantis_path
 
     if path.exists(release_dir):
         print "Error: release path already contains %s." % (release_name)
         sys.exit(3)
 
-    os.system("rsync -rltD --exclude=.git %s/ %s" % (mantis_path, release_dir))
+    # Generate temp file with list of exclusions
+    fp = tempfile.NamedTemporaryFile(delete=False)
+    print "  Excluded files and directories:"
+    for name in exclude_list:
+        print "    " + name
+        fp.write(name + "\n")
+    fp.close()
+
+    # Copy the files from the source repo, then delete temp file
+    os.system("rsync -rltD --exclude-from=%s %s/ %s" % (
+        fp.name,
+        mantis_path,
+        release_dir
+    ))
+    os.unlink(fp.name)
+    print "  Copy complete.\n"
 
     # Apply version suffix
     if version_suffix:
@@ -129,47 +157,12 @@ def main():
             path.join(release_dir, "config_defaults_inc.php")
         ))
 
-    # Walk through and remove custom files
-    print "Removing custom files from release path..."
-
-    def custom_files(name):
-        if name in (
-                ".gitignore",
-                "config_inc.php",
-                "custom_constant_inc.php",
-                "custom_strings_inc.php",
-                "custom_functions_inc.php",
-                "mantis_offline.php",
-                "web.config"
-                ):
-            return True
-        else:
-            return False
-
-    def custom_dirs(name):
-        if name in (
-                "packages"
-                ):
-            return True
-        else:
-            return False
-
-    for root, dirs, files in os.walk(release_dir, topdown=False):
-        files = filter(custom_files, files)
-        dirs = filter(custom_dirs, dirs)
-        for name in files:
-            print "  " + path.join(root, name)
-            os.remove(path.join(root, name))
-        for name in dirs:
-            print "  " + path.join(root, name) + "/"
-            os.system("rm -rf %s" % path.join(root, name))
-
     # Build documentation for release
     if build_docbook:
         print "Building docbook manuals..."
         os.system("%s --release %s %s" % (
             manualscript,
-            path.join(release_dir, "docbook"),
+            path.join(mantis_path, "docbook"),
             path.join(release_dir, "doc")
         ))
 

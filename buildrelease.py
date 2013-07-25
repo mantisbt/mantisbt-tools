@@ -159,7 +159,7 @@ def main():
 
     # Build documentation for release
     if build_docbook:
-        print "Building docbook manuals..."
+        print "Building docbook manuals...\n"
         os.system("%s --release %s %s" % (
             manualscript,
             path.join(mantis_path, "docbook"),

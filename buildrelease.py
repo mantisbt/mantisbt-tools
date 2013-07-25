@@ -16,14 +16,26 @@ manualscript = path.dirname(path.abspath(__file__)) + '/docbook-manual.py'
 
 # List of files and dirs to exclude from the release tarball
 exclude_list = (
+    # System / build files
     ".git*",
+    ".mailmap",
+    ".travis.yml",
+    "build.xml",
+    "web.config",
+    # User custom files
     "config_inc.php",
-    "custom_constant_inc.php",
+    "custom_constant*_inc.php",
     "custom_functions_inc.php",
     "custom_strings_inc.php",
+    "custom_relationships_inc.php",
     "mantis_offline.php",
-    "web.config"
-    "packages"
+    "mc_config_inc.php",
+    # Directories
+    "docbook/",
+    "javascript/dev/",
+    "packages/",
+    "phing/",
+    "tests/"
     )
 
 

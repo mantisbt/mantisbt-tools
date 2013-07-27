@@ -205,24 +205,18 @@ def main():
     # Generate checksums
     print "Generating checksums..."
 
-    tar_md5 = os.popen("md5sum --binary %s.tar.gz" % (release_name)).read()
-    tar_sha1 = os.popen("sha1sum --binary %s.tar.gz" % (release_name)).read()
+    for ext in tarball_ext:
+        tarball = "%s.%s " % (release_name, ext)
+        print "  " + tarball
+        f = open("%s.digests" % tarball, 'w')
 
-    zip_md5 = os.popen("md5sum --binary %s.zip" % (release_name)).read()
-    zip_sha1 = os.popen("sha1sum --binary %s.zip" % (release_name)).read()
+        for method in ("md5", "sha1"):
+            checksum_cmd = "%ssum --binary " % method
+            checksum = os.popen(checksum_cmd + tarball).read()
+            f.write("%s\n" % checksum)
+            print "    %s: %s" % (method, checksum.rstrip())
 
-    f = open("%s.tar.gz.digests" % release_name, 'w')
-    f.write("%s\n%s\n" % (tar_md5, tar_sha1))
-    f.close()
-
-    f = open("%s.zip.digests" % release_name, 'w')
-    f.write("%s\n%s\n" % (zip_md5, zip_sha1))
-    f.close()
-
-    print "  " + tar_md5
-    print "  " + tar_sha1
-    print "  " + zip_md5
-    print "  " + zip_sha1
+        f.close()
 
     # Cleanup
     if clean_build:

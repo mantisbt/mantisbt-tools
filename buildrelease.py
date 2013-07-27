@@ -195,9 +195,12 @@ def main():
 
     # Sign tarballs
     print "Signing tarballs"
+    gpgsign = "gpg -b -a --batch %s"
 
-    os.system("gpg -b -a %s.tar.gz" % (release_name))
-    os.system("gpg -b -a %s.zip" % (release_name))
+    for ext in tarball_ext:
+        tarball = "%s.%s " % (release_name, ext)
+        print "  " + tarball
+        os.system(gpgsign % tarball)
 
     # Generate checksums
     print "Generating checksums..."

@@ -180,10 +180,18 @@ def main():
 
     # Create tarballs
     print "Creating release tarballs..."
-
     os.chdir(release_path)
-    os.system("tar czf %s.tar.gz %s" % (release_name, release_name))
-    os.system("zip -rq %s.zip %s" % (release_name, release_name))
+    tarball_ext = ("tar.gz", "zip")
+
+    for ext in tarball_ext:
+        if ext == "tar.gz":
+            tar_cmd = "tar czf"
+        elif ext == "zip":
+            tar_cmd = "zip -rq"
+        tar_cmd += " %(rel)s.%(ext)s %(rel)s"
+
+        print "  " + ext
+        os.system(tar_cmd % {"rel": release_name, "ext": ext})
 
     # Sign tarballs
     print "Signing tarballs"

@@ -163,11 +163,11 @@ def main():
     # Apply version suffix
     if version_suffix:
         print "Applying version suffix..."
-        sed_cmd = "s,{0}(\s+)=(\s*)'.*',{0}\\1=\\2'{1}'".format(
+        sed_cmd = "s/(%s\s*=\s*)'.*'/\\1'%s'/" % (
             'g_version_suffix',
             version_suffix
         )
-        os.system('sed -r -i.bak "%s", %s' % (
+        os.system('sed -r -i.bak "%s" %s' % (
             sed_cmd,
             path.join(release_dir, "config_defaults_inc.php")
         ))

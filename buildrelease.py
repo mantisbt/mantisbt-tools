@@ -3,10 +3,9 @@
 import getopt
 import os
 from os import path
-import tempfile
-import getopt
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 
@@ -152,11 +151,13 @@ def main():
     fp.close()
 
     # Copy the files from the source repo, then delete temp file
-    os.system("rsync -rltD --exclude-from=%s %s/ %s" % (
+    rsync = "rsync -rltD --exclude-from=%s %s/ %s" % (
         fp.name,
         mantis_path,
         release_dir
-    ))
+    )
+    subprocess.call(rsync, shell=True)
+
     os.unlink(fp.name)
     print "  Copy complete.\n"
 
@@ -167,19 +168,24 @@ def main():
             'g_version_suffix',
             version_suffix
         )
-        os.system('sed -r -i.bak "%s" %s' % (
-            sed_cmd,
-            path.join(release_dir, "config_defaults_inc.php")
-        ))
+        subprocess.call(
+            'sed -r -i.bak "%s" %s' % (
+                sed_cmd,
+                path.join(release_dir, "config_defaults_inc.php")
+            ),
+            shell=True
+        )
 
     # Build documentation for release
     if build_docbook:
         print "Building docbook manuals...\n"
-        os.system("%s --release %s %s" % (
-            manualscript,
-            path.join(mantis_path, "docbook"),
-            path.join(release_dir, "doc")
-        ))
+        subprocess.call(
+            manualscript + " --release %s %s" % (
+                path.join(mantis_path, "docbook"),
+                path.join(release_dir, "doc")
+            ),
+            shell=True
+        )
 
     # Create tarballs
     print "Creating release tarballs..."
@@ -194,7 +200,10 @@ def main():
         tar_cmd += " %(rel)s.%(ext)s %(rel)s"
 
         print "  " + ext
-        os.system(tar_cmd % {"rel": release_name, "ext": ext})
+        subprocess.call(
+            tar_cmd % {"rel": release_name, "ext": ext},
+            shell=True
+        )
 
     # Sign tarballs
     print "Signing tarballs"
@@ -203,7 +212,7 @@ def main():
     for ext in tarball_ext:
         tarball = "%s.%s " % (release_name, ext)
         print "  " + tarball
-        os.system(gpgsign % tarball)
+        subprocess.call(gpgsign % tarball, shell=True)
 
     # Generate checksums
     print "Generating checksums..."

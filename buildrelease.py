@@ -3,7 +3,10 @@
 import getopt
 import os
 from os import path
+import tempfile
+import getopt
 import re
+import shutil
 import sys
 import tempfile
 
@@ -221,12 +224,7 @@ def main():
     # Cleanup
     if clean_build:
         print "Removing build directory..."
-        for root, dirs, files in os.walk(release_dir, topdown=False):
-            for name in files:
-                os.remove(path.join(root, name))
-            for name in dirs:
-                os.rmdir(path.join(root, name))
-        os.rmdir(release_dir)
+        shutil.rmtree(release_dir)
 
     # Restore previous umask
     os.umask(old_umask)

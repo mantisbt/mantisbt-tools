@@ -1,26 +1,34 @@
 #!/usr/bin/python -u
 
-import os, sys
-from os import path
-
 import getopt
+import os
+from os import path
 import re
+import sys
 
 # Script options
 options = "hcdv:s:"
-long_options = [ "help", "clean", "docbook", "version=", "suffix=" ]
+long_options = ["help", "clean", "docbook", "version=", "suffix="]
 
 # Absolute path to docbook-manual.py
 manualscript = path.dirname(path.abspath(__file__)) + '/docbook-manual.py'
 
+
 def usage():
-    print '''Usage: buildrelease [options] /path/for/tarballs [/path/to/mantisbt]
-Options:  -h | --help               Show this usage message
-          -c | --clean              Remove build directory when completed
-          -d | --docbook            Build the docbook manuals
-          -v | --version <version>  Override version name detection
-          -s | --suffix <suffix>    Include version suffix in config file'''
+    print '''Builds a release (zip/tarball)
+
+Usage: %s [options] /path/for/tarballs [/path/to/mantisbt]
+
+Options:
+    -h | --help               Show this usage message
+
+    -c | --clean              Remove build directory when completed
+    -d | --docbook            Build and include the docbook manuals
+    -v | --version <version>  Override version name detection
+    -s | --suffix <suffix>    Include version suffix in config file
+''' % path.basename(__file__)
 #end usage()
+
 
 def main():
     try:
@@ -63,7 +71,7 @@ def main():
         mantis_path = args[1]
 
     # 'Standard' umask
-    old_umask = os.umask( 0002 )
+    old_umask = os.umask(0002)
 
     # Check paths
     if not path.isdir(release_path):
@@ -74,11 +82,13 @@ def main():
         print "Error: mantis path is not a directory or does not exist."
         sys.exit(3)
 
-    if not path.isfile(path.join(mantis_path, "core.php"))\
-        or not path.isdir(path.join(mantis_path, "core"))\
-        or not path.isfile(path.join(mantis_path, "core", "constant_inc.php")):
-
-        print "Error: mantis path does not appear to be a valid Mantis directory."
+    if (
+        not path.isfile(path.join(mantis_path, "core.php")) or
+        not path.isdir(path.join(mantis_path, "core")) or
+        not path.isfile(path.join(mantis_path, "core", "constant_inc.php"))
+    ):
+        print "Error: '%s' does not appear to be a valid Mantis directory." % \
+            mantis_path
         sys.exit(3)
 
     # Find Mantis version
@@ -87,7 +97,8 @@ def main():
         content = f.read()
         f.close
 
-        mantis_version = re.search("'MANTIS_VERSION'[,\s]+'([^']+)'", content).group(1)
+        mantis_version = re.search("'MANTIS_VERSION'[,\s]+'([^']+)'",
+                                   content).group(1)
 
     # Generate release name
     release_name = 'mantisbt-' + mantis_version
@@ -98,19 +109,25 @@ def main():
     # Copy to release path, removing custom files
     release_dir = path.join(release_path, release_name)
 
-    print "\nBuilding release '%s' in path '%s'"%(release_name, release_dir)
+    print "\nBuilding release '%s' in path '%s'" % (release_name, release_dir)
 
     if path.exists(release_dir):
-        print "Error: release path already contains %s."%(release_name)
+        print "Error: release path already contains %s." % (release_name)
         sys.exit(3)
 
-    os.system("rsync -rltD --exclude=.git %s/ %s"%(mantis_path, release_dir))
+    os.system("rsync -rltD --exclude=.git %s/ %s" % (mantis_path, release_dir))
 
     # Apply version suffix
     if version_suffix:
         print "Applying version suffix..."
-        os.system("sed -r -i=bak \"s,g_version_suffix(\s+)=(\s*)'.*',g_version_suffix\\1=\\2'%s'\", %s"%(
-            version_suffix, path.join(release_dir, "config_defaults_inc.php")))
+        sed_cmd = "s,{0}(\s+)=(\s*)'.*',{0}\\1=\\2'{1}'".format(
+            'g_version_suffix',
+            version_suffix
+        )
+        os.system('sed -r -i.bak "%s", %s' % (
+            sed_cmd,
+            path.join(release_dir, "config_defaults_inc.php")
+        ))
 
     # Walk through and remove custom files
     print "Removing custom files from release path..."
@@ -141,45 +158,49 @@ def main():
         files = filter(custom_files, files)
         dirs = filter(custom_dirs, dirs)
         for name in files:
-            print "  " + path.join(root,name)
+            print "  " + path.join(root, name)
             os.remove(path.join(root, name))
         for name in dirs:
-            print "  " + path.join(root,name) + "/"
-            os.system("rm -rf %s"%path.join(root, name))
+            print "  " + path.join(root, name) + "/"
+            os.system("rm -rf %s" % path.join(root, name))
 
     # Build documentation for release
     if build_docbook:
         print "Building docbook manuals..."
-        os.system("%s --release %s %s"%(manualscript, path.join(release_dir, "docbook"), path.join(release_dir, "doc")))
+        os.system("%s --release %s %s" % (
+            manualscript,
+            path.join(release_dir, "docbook"),
+            path.join(release_dir, "doc")
+        ))
 
     # Create tarballs
     print "Creating release tarballs..."
 
     os.chdir(release_path)
-    os.system("tar czf %s.tar.gz %s"%(release_name, release_name))
-    os.system("zip -rq %s.zip %s"%(release_name, release_name))
+    os.system("tar czf %s.tar.gz %s" % (release_name, release_name))
+    os.system("zip -rq %s.zip %s" % (release_name, release_name))
 
     # Sign tarballs
     print "Signing tarballs"
 
-    os.system("gpg -b -a %s.tar.gz"%(release_name))
-    os.system("gpg -b -a %s.zip"%(release_name))
+    os.system("gpg -b -a %s.tar.gz" % (release_name))
+    os.system("gpg -b -a %s.zip" % (release_name))
 
     # Generate checksums
     print "Generating checksums..."
 
-    tar_md5 = os.popen("md5sum --binary %s.tar.gz"%(release_name)).read()
-    tar_sha1 = os.popen("sha1sum --binary %s.tar.gz"%(release_name)).read()
+    tar_md5 = os.popen("md5sum --binary %s.tar.gz" % (release_name)).read()
+    tar_sha1 = os.popen("sha1sum --binary %s.tar.gz" % (release_name)).read()
 
-    zip_md5 = os.popen("md5sum --binary %s.zip"%(release_name)).read()
-    zip_sha1 = os.popen("sha1sum --binary %s.zip"%(release_name)).read()
+    zip_md5 = os.popen("md5sum --binary %s.zip" % (release_name)).read()
+    zip_sha1 = os.popen("sha1sum --binary %s.zip" % (release_name)).read()
 
-    f = open("%s.tar.gz.digests"%release_name, 'w')
-    f.write("%s\n%s\n"%(tar_md5, tar_sha1))
+    f = open("%s.tar.gz.digests" % release_name, 'w')
+    f.write("%s\n%s\n" % (tar_md5, tar_sha1))
     f.close()
 
-    f = open("%s.zip.digests"%release_name, 'w')
-    f.write("%s\n%s\n"%(zip_md5, zip_sha1))
+    f = open("%s.zip.digests" % release_name, 'w')
+    f.write("%s\n%s\n" % (zip_md5, zip_sha1))
     f.close()
 
     print "  " + tar_md5
@@ -198,7 +219,7 @@ def main():
         os.rmdir(release_dir)
 
     # Restore previous umask
-    os.umask( old_umask )
+    os.umask(old_umask)
 
     print "Done!\n"
 

@@ -1,12 +1,12 @@
 #!/usr/bin/python -u
 
-import os, sys
-from os import path
-
 import getopt
 import re
+import os
+from os import path
 import shutil
 import subprocess
+import sys
 import tempfile
 
 # clone URL for MantisBT repository
@@ -17,29 +17,41 @@ buildscript = path.dirname(path.abspath(__file__)) + '/buildrelease.py'
 
 # Regular expressions of refs to ignore
 ignorelist = map(re.compile, [
-            'HEAD',
-            '-1\.0\.[\w\d]+',
-            ])
+                 'HEAD',
+                 '-1\.0\.[\w\d]+',
+                 ])
 
 # Script options
 options = "hfr:bacds:"
-long_options = [ "help", "fresh", "ref=", "branches", "auto-suffix", "clean", "docbook", "suffix=" ]
+long_options = ["help", "fresh", "ref=", "branches", "auto-suffix", "clean",
+                "docbook", "suffix="]
+
 
 def usage():
-    print '''Usage: buildrelease-repo [options] /path/for/tarballs [/path/to/repo]
-Options:  -h | --help                  Show this usage message
+    print '''Builds one or more releases (zip/tarball) for the specified
+references or for all branches.
 
-          -f | --fresh                 Create a fresh clone at repository path, or temporary path
-          -r | --ref <ref>[,<ref>...]  Build a release for named refs <ref>
-          -b | --branches              Build a release for all branches
-          -a | --auto-suffix           Automatically append the Git hash to the version suffix
+Usage: %s [options] /path/for/tarballs [/path/to/repo]
 
-          -c | --clean                 Remove build directories when completed
-          -d | --docbook               Build the docbook manuals
-          -s | --suffix <suffix>       Include version suffix in config files'''
+Options:
+    -h | --help                  Show this usage message
+
+    -f | --fresh                 Create a fresh clone in repository path,
+                                 or temporary path
+    -r | --ref <ref>[,<ref>...]  Build a release for named refs <ref>
+    -b | --branches              Build a release for all branches
+    -a | --auto-suffix           Automatically append the HEAD commit's sha1
+                                 to the version suffix
+
+The following options are passed on to '%s':
+    -c | --clean                 Remove build directories when completed
+    -d | --docbook               Build the docbook manuals
+    -s | --suffix <suffix>       Include version suffix in config files
+''' % (path.basename(__file__), path.basename(buildscript))
 #end usage()
 
-def ignore( ref ):
+
+def ignore(ref):
     '''Decide which refs to ignore based on regexen listed in 'ignorelist'.
     '''
 
@@ -49,6 +61,7 @@ def ignore( ref ):
             ignore = True
     return ignore
 #end ignore()
+
 
 def main():
     try:
@@ -108,7 +121,8 @@ def main():
         if repo_path == ".":
             repo_path = tempfile.mkdtemp(prefix="mantisbt-", suffix=".git")
             delete_clone = True
-        ret = subprocess.call('git clone %s %s' % (clone_url, repo_path), shell=True)
+        ret = subprocess.call('git clone %s %s' % (clone_url, repo_path),
+                              shell=True)
         if ret != 0:
             print "ERROR: clone failed"
             sys.exit(1)
@@ -133,14 +147,14 @@ def main():
     # Info
     print "\nWill build the following releases:"
     for ref in refs:
-        print "  %s"%ref
+        print "  %s" % ref
 
     # Regex to strip 'origin/' from ref names
     refnameregex = re.compile('(?:[a-zA-Z0-9-.]+/)?(.*)')
 
     for ref in refs:
-        print "\nChecking out '%s'"%ref
-        os.system("git checkout -f -q %s"%(ref))
+        print "\nChecking out '%s'" % ref
+        os.system("git checkout -f -q %s" % ref)
         os.system("git log -n1 --pretty='HEAD is now at %h... %s'")
 
         # Update and reset submodules
@@ -151,20 +165,20 @@ def main():
         # Handle suffix/auto-suffix generation
         hash = os.popen('git log --pretty="format:%h" -n1').read()
         if hash != ref:
-            ref = refnameregex.search( ref ).group(1)
-            hash = "%s-%s"%(ref,hash)
+            ref = refnameregex.search(ref).group(1)
+            hash = "%s-%s" % (ref, hash)
 
         suffix = ""
         if auto_suffix and version_suffix:
-            suffix = "--suffix %s-%s"%(version_suffix, hash)
+            suffix = "--suffix %s-%s" % (version_suffix, hash)
         elif auto_suffix:
-            suffix = "--suffix %s"%hash
+            suffix = "--suffix %s" % hash
         elif version_suffix:
-            suffix = "--suffix %s"%version_suffix
+            suffix = "--suffix %s" % version_suffix
 
         # Start building
-        os.system("%s %s %s %s %s"%(buildscript, pass_opts, suffix, release_path, repo_path))
-
+        os.system("%s %s %s %s %s" % (buildscript, pass_opts, suffix,
+                                      release_path, repo_path))
 
     # Cleanup temporary repo if needed
     if delete_clone:

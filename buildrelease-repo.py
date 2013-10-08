@@ -8,6 +8,9 @@ import re
 import shutil
 import tempfile
 
+# clone URL for MantisBT repository
+clone_url = 'git://github.com/mantisbt/mantisbt.git'
+
 # Absolute path to buildrelease.py
 buildscript = path.dirname(path.abspath(__file__)) + '/buildrelease.py'
 
@@ -100,10 +103,11 @@ def main():
 
     # Create a new repo clone
     if fresh_clone:
+        print "Origin MantisBT repository:", clone_url
         if repo_path == ".":
             repo_path = tempfile.mkdtemp(prefix="mantisbt-", suffix=".git")
             delete_clone = True
-        os.system('git clone git://github.com/mantisbt/mantisbt.git %s' % (repo_path))
+        os.system('git clone %s %s' % (clone_url, repo_path))
 
     # Change to the repo path
     os.chdir(repo_path)

@@ -6,6 +6,7 @@ from os import path
 import getopt
 import re
 import shutil
+import subprocess
 import tempfile
 
 # clone URL for MantisBT repository
@@ -107,7 +108,10 @@ def main():
         if repo_path == ".":
             repo_path = tempfile.mkdtemp(prefix="mantisbt-", suffix=".git")
             delete_clone = True
-        os.system('git clone %s %s' % (clone_url, repo_path))
+        ret = subprocess.call('git clone %s %s' % (clone_url, repo_path), shell=True)
+        if ret != 0:
+            print "ERROR: clone failed"
+            sys.exit(1)
 
     # Change to the repo path
     os.chdir(repo_path)

@@ -92,7 +92,7 @@ def main():
 
     # Process all existing manuals
     for dir in os.walk(docroot).next()[1]:
-        if dir == '.svn' or dir == 'template':
+        if dir == '.svn' or dir == 'template' or dir == 'erd':
             continue
 
         builddir = path.join(docroot, dir)

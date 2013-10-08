@@ -143,6 +143,11 @@ def main():
         os.system("git checkout -f -q %s"%(ref))
         os.system("git log -n1 --pretty='HEAD is now at %h... %s'")
 
+        # Update and reset submodules
+        print "Updating submodules"
+        subprocess.call('git submodule update --init', shell=True)
+        subprocess.call('git submodule foreach git co -- .', shell=True)
+
         # Handle suffix/auto-suffix generation
         hash = os.popen('git log --pretty="format:%h" -n1').read()
         if hash != ref:

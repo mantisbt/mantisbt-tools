@@ -14,7 +14,10 @@
 #
 
 # Reference file to retrieve current copyright year
-REF_FILE=core.php
+if [ -z "$REF_FILE" ]
+then
+   REF_FILE=core.php
+fi
 if [ ! -r "$REF_FILE" ]
 then
 	echo "ERROR: Reference file '$REF_FILE' not found in '$PWD'"
@@ -38,7 +41,7 @@ COPYRIGHT_YEAR_NEW=$(( $COPYRIGHT_YEAR_OLD + 1 ))
 #
 function bump_copyright()
 {
-	git grep -E -l "$1" | 
+	git grep -E -l "$1" |
 		xargs sed -i.bak -r -e "/$1/ s/$COPYRIGHT_YEAR_OLD/$COPYRIGHT_YEAR_NEW/"
 }
 

@@ -47,7 +47,7 @@ function usage() {
 
 
 function process_error() {
-	echo "ERROR: $1"
+	echo -e "\nERROR: $1"
 	if [ -n "$REPO" ]
 	then
 		echo "Fix issues in repository '$REPO' and try again"
@@ -112,6 +112,10 @@ do
 
 	cd $DIR_NAME/$REPO 2>/dev/null ||
 		process_error "repository '$REPO' does not exist in '$DIR_NAME' or is not accessible"
+
+	# Detect if there are unstaged changes in the repository's current branch
+	git diff-index --name-status --exit-code HEAD ||
+		process_error "There are unstaged changes"
 
 	# First update the reference branch, pull changes from upstream
 	echo "- Pulling upstream changes into reference branch '$UPDATE_BRANCH'"

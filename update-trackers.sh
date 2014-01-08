@@ -47,7 +47,12 @@ function usage() {
 
 
 function process_error() {
-	echo -e "\nERROR: $1"
+	echo -ne "\nERROR: "
+	if [ -n "$1" ]
+	then
+		echo $1
+	fi
+
 	if [ -n "$REPO" ]
 	then
 		echo "Fix issues in repository '$REPO' and try again"
@@ -114,8 +119,20 @@ do
 		process_error "repository '$REPO' does not exist in '$DIR_NAME' or is not accessible"
 
 	# Detect if there are unstaged changes in the repository's current branch
-	git diff-index --name-status --exit-code HEAD ||
-		process_error "There are unstaged changes"
+	git diff-index --name-status --exit-code HEAD
+	if [ $? -ne 0 ]
+	then
+		echo -e "\nThere are unstaged changes"
+		read -n 1 -p "Would you like to discard them ? "
+		echo
+		if [ "$(echo ${REPLY} | tr "[:upper:]" "[:lower:]")" = "y" ]
+		then
+			echo "Discarding changes"
+			git checkout -- . || process_error
+		else
+			process_error "can't proceed with unstaged changes"
+		fi
+	fi
 
 	# First update the reference branch, pull changes from upstream
 	echo "- Pulling upstream changes into reference branch '$UPDATE_BRANCH'"
@@ -149,12 +166,13 @@ do
 	grep "^\s*\$g_version_suffix" $CONFIG_FILE >/dev/null
 	if [ $? -eq 0 ]
 	then
-		echo "Updating existing config"
+		echo "Updating existing config file"
 		sed -r -i.bak "s/^(\s*\\\$g_version_suffix\s*=\s*[\"']).*([\"'])/\1$VERSION_SUFFIX\2/" $CONFIG_FILE
 	else
 		echo "Config option does not exist, appending it to end of file"
 		echo "\$g_version_suffix = '$VERSION_SUFFIX';" >>$CONFIG_FILE
 	fi
+
 	# Syntax check the modified config file, just in case
 	php -l $CONFIG_FILE ||
 		process_error "Invalid $CONFIG_FILE"

@@ -218,7 +218,7 @@ def main():
     print "Generating checksums..."
 
     for ext in tarball_ext:
-        tarball = "%s.%s " % (release_name, ext)
+        tarball = "%s.%s" % (release_name, ext)
         print "  " + tarball
         f = open("%s.digests" % tarball, 'w')
 

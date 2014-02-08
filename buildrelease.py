@@ -133,7 +133,7 @@ def main():
         release_name += '-' + version_suffix
 
     # Copy to release path, excluding unwanted files
-    release_dir = path.join(release_path, release_name)
+    release_dir = path.abspath(path.join(release_path, release_name))
 
     print "\nBuilding release '%s' in path '%s'" % (release_name, release_dir)
     print "  Source repository: '%s'\n" % mantis_path

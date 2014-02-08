@@ -70,6 +70,20 @@ def gpg_sign_tarball(filename):
         )
 
 
+def generate_checksum(filename):
+    ''' Generate MD5 and SHA1 checksums for the file '''
+
+    f = open("%s.digests" % filename, 'w')
+
+    for method in ("md5", "sha1"):
+        checksum_cmd = "%ssum --binary " % method
+        checksum = os.popen(checksum_cmd + filename).read()
+        f.write("%s\n" % checksum)
+        print "      %s: %s" % (method, checksum.rstrip())
+
+    f.close()
+
+
 def main():
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options, long_options)
@@ -220,21 +234,8 @@ def main():
         print "    Signing the tarball"
         gpg_sign_tarball(tarball)
 
-    # Generate checksums
-    print "Generating checksums..."
-
-    for ext in tarball_ext:
-        tarball = "%s.%s" % (release_name, ext)
-        print "  " + tarball
-        f = open("%s.digests" % tarball, 'w')
-
-        for method in ("md5", "sha1"):
-            checksum_cmd = "%ssum --binary " % method
-            checksum = os.popen(checksum_cmd + tarball).read()
-            f.write("%s\n" % checksum)
-            print "    %s: %s" % (method, checksum.rstrip())
-
-        f.close()
+        print "    Generating checksums..."
+        generate_checksum(tarball)
 
     # Cleanup
     if clean_build:

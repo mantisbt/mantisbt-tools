@@ -109,11 +109,11 @@ def main():
         usage()
         sys.exit(1)
 
-    release_path = args[0]
+    release_path = path.abspath(args[0])
     repo_path = "."
 
     if len(args) > 1:
-        repo_path = args[1]
+        repo_path = path.abspath(args[1])
 
     # Create a new repo clone
     if fresh_clone:

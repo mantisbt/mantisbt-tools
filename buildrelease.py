@@ -59,28 +59,22 @@ Options:
 
 def gpg_sign_tarball(filename):
     ''' Sign the file using GPG '''
-
     gpgsign = "gpg -b -a %s" + path.abspath(path.join(os.curdir, filename))
     try:
         subprocess.check_call(gpgsign % '--batch --yes ', shell=True)
     except subprocess.CalledProcessError:
         print "WARNING: GPG signature failed; to sign manually, run\n" \
-            "         %s" % (
-            gpgsign % ''
-        )
+            "         %s" % (gpgsign % '')
 
 
 def generate_checksum(filename):
     ''' Generate MD5 and SHA1 checksums for the file '''
-
     f = open("%s.digests" % filename, 'w')
-
     for method in ("md5", "sha1"):
         checksum_cmd = "%ssum --binary " % method
         checksum = os.popen(checksum_cmd + filename).read()
         f.write("%s\n" % checksum)
         print "      %s: %s" % (method, checksum.rstrip())
-
     f.close()
 
 

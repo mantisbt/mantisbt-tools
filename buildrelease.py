@@ -57,6 +57,19 @@ Options:
 #end usage()
 
 
+def gpg_sign_tarball(filename):
+    ''' Sign the file using GPG '''
+
+    gpgsign = "gpg -b -a %s" + path.abspath(path.join(os.curdir, filename))
+    try:
+        subprocess.check_call(gpgsign % '--batch ', shell=True)
+    except subprocess.CalledProcessError:
+        print "WARNING: GPG signature failed; to sign manually, run\n" \
+            "         %s" % (
+            gpgsign % ''
+        )
+
+
 def main():
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options, long_options)
@@ -187,32 +200,25 @@ def main():
             shell=True
         )
 
-    # Create tarballs
+    # Create tarballs and sign them
     print "Creating release tarballs..."
     os.chdir(release_path)
     tarball_ext = ("tar.gz", "zip")
 
     for ext in tarball_ext:
+        tarball = "%s.%s" % (release_name, ext)
+        print "  " + tarball
+
         if ext == "tar.gz":
-            tar_cmd = "tar czf"
+            tar_cmd = "tar -czf"
         elif ext == "zip":
             tar_cmd = "zip -rq"
-        tar_cmd += " %(rel)s.%(ext)s %(rel)s"
+        tar_cmd += " %s %s"
 
-        print "  " + ext
-        subprocess.call(
-            tar_cmd % {"rel": release_name, "ext": ext},
-            shell=True
-        )
+        subprocess.call(tar_cmd % (tarball, release_name), shell=True)
 
-    # Sign tarballs
-    print "Signing tarballs"
-    gpgsign = "gpg -b -a --batch %s"
-
-    for ext in tarball_ext:
-        tarball = "%s.%s " % (release_name, ext)
-        print "  " + tarball
-        subprocess.call(gpgsign % tarball, shell=True)
+        print "    Signing the tarball"
+        gpg_sign_tarball(tarball)
 
     # Generate checksums
     print "Generating checksums..."

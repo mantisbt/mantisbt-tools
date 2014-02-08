@@ -62,7 +62,7 @@ def gpg_sign_tarball(filename):
 
     gpgsign = "gpg -b -a %s" + path.abspath(path.join(os.curdir, filename))
     try:
-        subprocess.check_call(gpgsign % '--batch ', shell=True)
+        subprocess.check_call(gpgsign % '--batch --yes ', shell=True)
     except subprocess.CalledProcessError:
         print "WARNING: GPG signature failed; to sign manually, run\n" \
             "         %s" % (

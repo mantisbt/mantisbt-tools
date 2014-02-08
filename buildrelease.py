@@ -84,6 +84,11 @@ def generate_checksum(filename):
     f.close()
 
 
+def remove_build_dir(release_dir):
+    print "Removing build directory..."
+    shutil.rmtree(release_dir)
+
+
 def main():
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options, long_options)
@@ -239,8 +244,8 @@ def main():
 
     # Cleanup
     if clean_build:
-        print "Removing build directory..."
-        shutil.rmtree(release_dir)
+        print
+        remove_build_dir(release_dir)
 
     # Restore previous umask
     os.umask(old_umask)

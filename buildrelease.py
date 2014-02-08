@@ -182,7 +182,7 @@ def main():
         mantis_path,
         release_dir
     )
-    subprocess.call(rsync, shell=True)
+    subprocess.check_call(rsync, shell=True)
 
     os.unlink(fp.name)
     print "  Copy complete.\n"

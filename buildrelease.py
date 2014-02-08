@@ -57,6 +57,32 @@ Options:
 #end usage()
 
 
+def gpg_sign_tarball(filename):
+    ''' Sign the file using GPG '''
+    gpgsign = "gpg -b -a %s" + path.abspath(path.join(os.curdir, filename))
+    try:
+        subprocess.check_call(gpgsign % '--batch --yes ', shell=True)
+    except subprocess.CalledProcessError:
+        print "WARNING: GPG signature failed; to sign manually, run\n" \
+            "         %s" % (gpgsign % '')
+
+
+def generate_checksum(filename):
+    ''' Generate MD5 and SHA1 checksums for the file '''
+    f = open("%s.digests" % filename, 'w')
+    for method in ("md5", "sha1"):
+        checksum_cmd = "%ssum --binary " % method
+        checksum = os.popen(checksum_cmd + filename).read()
+        f.write("%s\n" % checksum)
+        print "      %s: %s" % (method, checksum.rstrip())
+    f.close()
+
+
+def remove_build_dir(release_dir):
+    print "Removing build directory..."
+    shutil.rmtree(release_dir)
+
+
 def main():
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:], options, long_options)
@@ -133,7 +159,7 @@ def main():
         release_name += '-' + version_suffix
 
     # Copy to release path, excluding unwanted files
-    release_dir = path.join(release_path, release_name)
+    release_dir = path.abspath(path.join(release_path, release_name))
 
     print "\nBuilding release '%s' in path '%s'" % (release_name, release_dir)
     print "  Source repository: '%s'\n" % mantis_path
@@ -187,53 +213,33 @@ def main():
             shell=True
         )
 
-    # Create tarballs
+    # Create tarballs and sign them
     print "Creating release tarballs..."
     os.chdir(release_path)
     tarball_ext = ("tar.gz", "zip")
 
     for ext in tarball_ext:
-        if ext == "tar.gz":
-            tar_cmd = "tar czf"
-        elif ext == "zip":
-            tar_cmd = "zip -rq"
-        tar_cmd += " %(rel)s.%(ext)s %(rel)s"
-
-        print "  " + ext
-        subprocess.call(
-            tar_cmd % {"rel": release_name, "ext": ext},
-            shell=True
-        )
-
-    # Sign tarballs
-    print "Signing tarballs"
-    gpgsign = "gpg -b -a --batch %s"
-
-    for ext in tarball_ext:
-        tarball = "%s.%s " % (release_name, ext)
-        print "  " + tarball
-        subprocess.call(gpgsign % tarball, shell=True)
-
-    # Generate checksums
-    print "Generating checksums..."
-
-    for ext in tarball_ext:
         tarball = "%s.%s" % (release_name, ext)
         print "  " + tarball
-        f = open("%s.digests" % tarball, 'w')
 
-        for method in ("md5", "sha1"):
-            checksum_cmd = "%ssum --binary " % method
-            checksum = os.popen(checksum_cmd + tarball).read()
-            f.write("%s\n" % checksum)
-            print "    %s: %s" % (method, checksum.rstrip())
+        if ext == "tar.gz":
+            tar_cmd = "tar -czf"
+        elif ext == "zip":
+            tar_cmd = "zip -rq"
+        tar_cmd += " %s %s"
 
-        f.close()
+        subprocess.call(tar_cmd % (tarball, release_name), shell=True)
+
+        print "    Signing the tarball"
+        gpg_sign_tarball(tarball)
+
+        print "    Generating checksums..."
+        generate_checksum(tarball)
 
     # Cleanup
     if clean_build:
-        print "Removing build directory..."
-        shutil.rmtree(release_dir)
+        print
+        remove_build_dir(release_dir)
 
     # Restore previous umask
     os.umask(old_umask)

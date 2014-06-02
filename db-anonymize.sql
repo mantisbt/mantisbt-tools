@@ -10,4 +10,4 @@ SET
 	password = '63a9f0ea7bb98050796b649e85481845',
 	email = CONCAT(username, '@localhost'),
 	cookie_string = CONCAT('cookie_', id),
-	realname = '';
+	realname = CONCAT('Realname', username);

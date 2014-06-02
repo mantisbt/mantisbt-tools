@@ -2,6 +2,8 @@
 -- For example, the database on http://www.mantisbt.org/bugs/
 -- The assumption here is that the sensitive data includes:
 -- Email addresses, passwords, cookies, and real names.
+--
+-- Used by db-dump.sh
 
 DELETE FROM mantis_email_table;
 

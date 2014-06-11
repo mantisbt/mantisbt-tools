@@ -56,7 +56,7 @@ def main():
             delete = True
 
         elif opt in ("-a", "--all"):
-            types[MAKE] = "html html_onefile html.tar.gz text pdf ps"
+            types[MAKE] = "html html_onefile html.tar.gz text pdf"
             types[PUBLICAN] = "html,html-desktop,txt,pdf"
 
         elif opt == "--html":

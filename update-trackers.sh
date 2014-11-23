@@ -28,7 +28,7 @@
 #
 
 # The upstream reference branch to update in the target repository
-UPDATE_BRANCH=master-1.2.x
+UPDATE_BRANCH=master
 
 
 #------------------------------------------------------------------------------

@@ -177,6 +177,17 @@ do
 	php -l $CONFIG_FILE ||
 		process_error "Invalid $CONFIG_FILE"
 
+	echo
+	read -n 1 -p "The 'admin' directory should be deleted. Would you like to do it now ? "
+	echo
+	ADMIN_DIR=$PWD/admin
+	if [ "$(echo ${REPLY} | tr "[:upper:]" "[:lower:]")" = "y" ]
+	then
+		rm -rvf $ADMIN_DIR
+	else
+		echo "WARNING: Remember to delete it after completing the upgrade (rm -rf $ADMIN_DIR)"
+	fi
+
 	echo -e "\nRepository '$REPO' updated successfully\n"
 	cd - >/dev/null
 done

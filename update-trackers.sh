@@ -65,7 +65,7 @@ function process_error() {
 # Initialization
 #
 
-CONFIG_FILE=config_inc.php
+CONFIG_FILE=config/config_inc.php
 
 # Parse command-line options
 while getopts b:c:h OPT

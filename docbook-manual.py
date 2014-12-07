@@ -71,7 +71,7 @@ def main():
             types[MAKE] = "html_onefile pdf text"
             types[PUBLICAN] = "html-desktop,pdf,txt"
 
-    docroot = args[0]
+    docroot = path.abspath(args[0])
     installroot = args[1]
     languages = []
 

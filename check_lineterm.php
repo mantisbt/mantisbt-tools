@@ -78,7 +78,7 @@
 
 					default:
 						# File extensions
-						if( preg_match( '/\.(jpg|gif|png|zip)$/', $file ) ) {
+						if( preg_match( '/\.(jpg|gif|png|zip|wav|ttf)$/', $file ) ) {
 							continue 2;
 						}
 				}

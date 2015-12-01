@@ -160,6 +160,10 @@ do
 		continue
 	fi
 
+	# Update submodules
+	echo "- Updating submodules"
+	git submodule update --init --recursive
+
 	# Updating the version suffix in config file
 	echo "- Setting version_suffix to '$VERSION_SUFFIX' in $CONFIG_FILE"
 	test -f $CONFIG_FILE || process_error "missing $CONFIG_FILE"
@@ -177,6 +181,7 @@ do
 	php -l $CONFIG_FILE ||
 		process_error "Invalid $CONFIG_FILE"
 
+	# Cleanup
 	echo
 	read -n 1 -p "The 'admin' directory should be deleted. Would you like to do it now ? "
 	echo

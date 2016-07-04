@@ -54,14 +54,14 @@ EOF
 
 # Build the tarballs
 refList=$(eval echo origin/{$branches})
-$pathTools/buildrelease-repo.py --auto-suffix --ref ${refList/ /,} --fresh --docbook $pathBuilds >>$logfile 2>&1
+$pathTools/buildrelease-repo.py --auto-suffix --ref ${refList// /,} --fresh --docbook $pathBuilds >>$logfile 2>&1
 echo >>$logfile
 
 
 # Delete old nightly builds
 echo "Keeping only the most recent $numToKeep" >>$logfile
 cd $pathBuilds
-for branch in ${branches/,/ }
+for branch in ${branches//,/ }
 do
 	echo "  Processing '$branch' branch"
 	# List files by date, grep for branch with shortened MD5 pattern and key

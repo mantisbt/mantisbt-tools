@@ -65,6 +65,9 @@ DUMPFILE=$TARGETDIR/${DBNAME}_dump_$(date +"%Y%m%d").sql.bz2
 # Temporary database clone
 DBCLONE=${DBNAME}_clone_$RANDOM
 
+# DB anonymization script
+SQL_ANONYMIZE=$(dirname $0)/db-anonymize.sql
+
 # Trap signals to ensure we drop the temporary clone database in case of
 # unexpected interuption
 trap "{
@@ -83,7 +86,7 @@ set -o pipefail
 mysqldump --lock-tables $DBNAME |mysql $DBCLONE
 
 echo "Clean up and anonymize the cloned database"
-mysql -v $DBCLONE <db-anonymize.sql
+mysql -v $DBCLONE <$SQL_ANONYMIZE
 
 echo "Dumping '$DBCLONE' to '$TARGETDIR'"
 mysqldump $DBNAME | bzip2 > $DUMPFILE

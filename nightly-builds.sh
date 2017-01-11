@@ -55,7 +55,12 @@ EOF
 # Build the tarballs
 echo "$(date +'%F %T') Generating nightly builds for branches:"
 refList=$(eval echo origin/{$branches})
-echo $refList |sed -r 's/ /\n/g;s/(^|\n)/\1  /g'
+if [[ $branches == *,* ]]
+then
+	refList=$(eval echo origin/{$branches})
+else
+	refList=origin/$branches
+fi
 $pathTools/buildrelease-repo.py --auto-suffix --ref ${refList// /,} --fresh --docbook $pathBuilds >>$logfile 2>&1
 echo >>$logfile
 

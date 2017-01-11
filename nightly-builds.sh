@@ -53,13 +53,15 @@ cat <<-EOF >>$logfile
 EOF
 
 # Build the tarballs
+echo "$(date +'%F %T') Generating nightly builds for branches:"
 refList=$(eval echo origin/{$branches})
+echo $refList |sed -r 's/ /\n/g;s/(^|\n)/\1  /g'
 $pathTools/buildrelease-repo.py --auto-suffix --ref ${refList// /,} --fresh --docbook $pathBuilds >>$logfile 2>&1
 echo >>$logfile
 
 
 # Delete old nightly builds
-echo "Keeping only the most recent $numToKeep" >>$logfile
+echo "Keeping only the most recent $numToKeep builds" |tee -a $logfile
 cd $pathBuilds
 for branch in ${branches//,/ }
 do
@@ -78,4 +80,5 @@ echo >>$logfile
 
 
 # All done !
-echo "$(date +'%F %T') Build complete !" >>$logfile
+echo "$(date +'%F %T') Build complete !" |tee -a $logfile
+echo "Review logfile in $logfile"

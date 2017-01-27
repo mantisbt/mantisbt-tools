@@ -22,3 +22,9 @@ github:
     # Generate at https://github.com/settings/tokens
     # The token must have at least `public_repo` scope
     token: null
+
+    # Global teams in mantisbt-plugins org that should have access to
+    # all repositories
+    teams:
+        - translatewiki.net
+        - Core team

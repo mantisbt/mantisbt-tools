@@ -1,0 +1,15 @@
+# -----------------------------------------------------------------------------
+# Configuration file for MantisBT utility scripts (YAML format)
+#
+# These default values can be overridden as needed from a 'config.yml'
+# file, setting only those values that need to be set
+# -----------------------------------------------------------------------------
+
+
+# -----------------------------------------------------------------------------
+# Github settings
+#
+github:
+    # API user ID and password - default to anonymous access
+    user:         None
+    password:     None

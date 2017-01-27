@@ -1,3 +1,6 @@
+# Local configurations overrides
+config.yml
+
 # Python
 *.pyc
 

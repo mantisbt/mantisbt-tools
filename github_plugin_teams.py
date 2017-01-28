@@ -29,10 +29,17 @@ def retrieve_teams(org):
     Returns a list of Team objects for the names defined in github_teams
     that have fewer repositories than the specified organization
     """
-    teams = []
+    teams = {}
     for team in org.get_teams():
         if team.name in cfg.github['teams']:
-            teams.append(team)
+            teams[team.name] = team
+
+    # Check for invalid team names in config file
+    invalid = set(cfg.github['teams']) - set(teams)
+    if invalid:
+        print "Unknown teams specified in configuration:", ', '.join(invalid)
+        sys.exit(1)
+
     return teams
 
 
@@ -77,7 +84,7 @@ def main():
 
     # Check that the team grants access to each of the org's repo
     # Add write access if not
-    for team in teams:
+    for team in teams.values():
         print "Processing team '{0}'".format(team.name)
         count = 0
 

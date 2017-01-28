@@ -87,6 +87,7 @@ def main():
     for team in teams.values():
         print "Processing team '{0}'".format(team.name)
         count = 0
+        access = cfg.github['teams'][team.name]
 
         print "  Retrieving repositories...",
         team_repos = retrieve_team_repos(team)
@@ -96,8 +97,11 @@ def main():
         for repo in org_repos:
             if repo.id not in team_repos:
                 count += 1
-                print "  Grant write access to plugin '{0}'".format(repo.name)
-                team.set_repo_permission(repo, 'push')
+                print "  Grant {0} access to plugin '{1}'".format(
+                    access,
+                    repo.name
+                    )
+                team.set_repo_permission(repo, access)
         print "  {0} plugins processed".format(count)
 
 

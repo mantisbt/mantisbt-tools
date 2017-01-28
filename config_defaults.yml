@@ -24,7 +24,8 @@ github:
     token: null
 
     # Global teams in mantisbt-plugins org that should have access to
-    # all repositories
+    # all repositories.
+    # key = team name, value = privilege (pull, push or admin)
     teams:
-        - translatewiki.net
-        - Core team
+        Core team:         admin
+        translatewiki.net: push

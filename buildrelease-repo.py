@@ -156,6 +156,14 @@ def main():
         print "\nChecking out '%s'" % ref
         os.system("git checkout -f -q %s" % ref)
         os.system("git log -n1 --pretty='HEAD is now at %h... %s'")
+        print
+
+        # Composer
+        if path.isfile('composer.json'):
+            print "Installing Composer packages"
+            if subprocess.call('composer install', shell=True):
+                sys.exit(1)
+            print
 
         # Update and reset submodules
         print "Updating submodules"

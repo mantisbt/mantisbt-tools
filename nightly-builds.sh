@@ -59,7 +59,7 @@ find $pathBuilds -maxdepth 1 -name 'mantisbt*' |
 	xargs --no-run-if-empty rm -r 2>&1 |tee -a $logfile
 
 # Build the tarballs
-echo "$(date +'%F %T') Generating nightly builds for branches:"
+echo "$(date +'%F %T') Generating nightly builds for branches:" |tee -a $logfile
 refList=$(eval echo origin/{$branches})
 if [[ $branches == *,* ]]
 then
@@ -67,7 +67,7 @@ then
 else
 	refList=origin/$branches
 fi
-$pathTools/buildrelease-repo.py --auto-suffix --ref ${refList// /,} --fresh --docbook $pathBuilds >>$logfile 2>&1
+$pathTools/buildrelease-repo.py --auto-suffix --ref ${refList// /,} --fresh --docbook $pathBuilds 2>&1 |tee -a $logfile
 echo >>$logfile
 
 
@@ -86,7 +86,7 @@ do
 		echo "    Deleting files for $fileSpec"
 		rm -r $fileSpec*
 	done
-done >>$logfile
+done |tee -a $logfile
 echo >>$logfile
 
 

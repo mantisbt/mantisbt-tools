@@ -73,7 +73,7 @@ def generate_checksum(filename):
     for method in ("md5", "sha1"):
         checksum_cmd = "%ssum --binary " % method
         checksum = os.popen(checksum_cmd + filename).read()
-        f.write("%s\n" % checksum)
+        f.write(checksum)
         print "      %s: %s" % (method, checksum.rstrip())
     f.close()
 

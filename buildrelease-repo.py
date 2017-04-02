@@ -162,7 +162,7 @@ def main():
         if path.isfile('composer.json'):
             print "Installing Composer packages"
             if subprocess.call('composer install', shell=True):
-                sys.exit(1)
+                continue
             print
 
         # Update and reset submodules

@@ -52,6 +52,12 @@ cat <<-EOF >>$logfile
 
 EOF
 
+# Remove any builds not part of the branches list
+echo "$(date +'%F %T') Deleting old builds not part of branches list" |tee -a $logfile
+find $pathBuilds -maxdepth 1 -name 'mantisbt*' |
+	grep -vE -- "-(${branches//,/|})-[0-9a-f]{7}" |
+	xargs --no-run-if-empty rm -r 2>&1 |tee -a $logfile
+
 # Build the tarballs
 echo "$(date +'%F %T') Generating nightly builds for branches:"
 refList=$(eval echo origin/{$branches})

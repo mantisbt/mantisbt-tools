@@ -15,7 +15,7 @@
 #
 
 # Comma-delimited list of branches to process
-branches='master,master-2.0.x,master-1.3.x'
+branches='master,master-2.3,master-2.2,master-1.3.x'
 
 # Where to save the builds
 pathBuilds=/srv/www/builds

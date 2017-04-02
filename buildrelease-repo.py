@@ -161,7 +161,7 @@ def main():
         # Composer
         if path.isfile('composer.json'):
             print "Installing Composer packages"
-            if subprocess.call('composer install', shell=True):
+            if subprocess.call('composer install --no-plugins --no-scripts', shell=True):
                 continue
             print
 

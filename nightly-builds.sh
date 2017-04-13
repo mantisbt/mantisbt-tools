@@ -33,6 +33,14 @@ logfile=/var/log/$(basename $0 .sh).log
 # Key extension used to determine old releases to delete
 keyExt='.zip'
 
+# Directory in which phpenv is installed. The script will take care of
+# initializing the environment (i.e. set PATH and run 'phpenv init')
+export PHPENV_ROOT=/srv/phpenv
+
+# PHP version to use for builds (set with phpenv)
+# - version must be setup and compiled with 'phpenv install'
+# - to use the system's PHP version (i.e. don't use phpenv), set to blank
+PHPENV_phpVersion=7.0.17
 
 #------------------------------------------------------------------------------
 # Main
@@ -51,6 +59,29 @@ cat <<-EOF >>$logfile
 	$(date +"%F %T") - Building release tarballs
 
 EOF
+
+# Set PHP version to use for the builds
+if [ -n "$PHPENV_phpVersion" ]
+then
+	# Initialize phpenv
+	export PATH=$PHPENV_ROOT/bin:$PATH
+	eval "$(phpenv init -)"
+	PHPENV_oldVersion=$(phpenv global)
+
+	if [ "$PHPENV_phpVersion" != "$PHPENV_oldVersion" ]
+	then
+		echo "$(date +'%F %T') phpenv: setting PHP version to '$PHPENV_phpVersion'" |tee -a $logfile
+		phpenv global $PHPENV_phpVersion 2>&1 >/dev/null |tee -a $logfile
+
+		# Make sure the version was actually set
+		if [ "$(set -- $(phpenv version); echo $1)" != "$PHPENV_phpVersion" ]
+		then
+			exit 1;
+		fi
+	else
+		unset PHPENV_oldVersion
+	fi
+fi
 
 # Remove any builds not part of the branches list
 echo "$(date +'%F %T') Deleting old builds not part of branches list" |tee -a $logfile
@@ -89,6 +120,13 @@ do
 done |tee -a $logfile
 echo >>$logfile
 
+
+# Restore phpenv if necessary
+if [ -n "$PHPENV_oldVersion" ]
+then
+	echo "$(date +'%F %T') phpenv: restoring PHP version" |tee -a $logfile
+	phpenv global $PHPENV_phpVersion
+fi
 
 # All done !
 echo "$(date +'%F %T') Build complete !" |tee -a $logfile

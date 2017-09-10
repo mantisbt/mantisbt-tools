@@ -15,8 +15,12 @@
 #
 
 # Comma-delimited list of branches to process
-# Default will include all the branches present in the 'origin' remote
-branches=$(git ls-remote --heads origin | cut -d/ -f3 | paste -d, --serial)
+# If blank, all branches present in the 'origin' remote will be processed
+branches=
+
+# Path to reference MantisBT repository
+# This is used to build the branches list when not specified
+pathRepo=/srv/mantisbt
 
 # Where to save the builds
 pathBuilds=/srv/www/builds
@@ -84,6 +88,29 @@ then
 	fi
 fi
 
+# No branches specified, get the list from the reference repo
+if [[ -z "$branches" ]]
+then
+	echo "$(date +'%F %T') Retrieving branches from MantisBT repo in $pathRepo" |tee -a $logfile
+
+	cd $pathRepo
+	if [[ $? != 0 ]]
+	then
+		echo "ERROR: invalid directory $pathRepo" >>$logfile
+		exit 1
+	fi
+
+	tempfile=$(mktemp)
+	if git remote show origin -n 2>$tempfile >/dev/null
+	then
+		branches=$(git ls-remote --heads origin | cut -d/ -f3 | paste -d, --serial)
+	else
+		cat $tempfile |tee -a $logfile
+	fi
+	rm $tempfile
+	[[ -z "$branches" ]] && exit 1
+fi
+
 # Remove any builds not part of the branches list
 echo "$(date +'%F %T') Deleting old builds not part of branches list" |tee -a $logfile
 find $pathBuilds -maxdepth 1 -name 'mantisbt*' |
@@ -91,7 +118,7 @@ find $pathBuilds -maxdepth 1 -name 'mantisbt*' |
 	xargs --no-run-if-empty rm -r 2>&1 |tee -a $logfile
 
 # Build the tarballs
-echo "$(date +'%F %T') Generating nightly builds for branches:" |tee -a $logfile
+echo "$(date +'%F %T') Generating nightly builds for branches: $branches" |tee -a $logfile
 refList=$(eval echo origin/{$branches})
 if [[ $branches == *,* ]]
 then

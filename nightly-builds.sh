@@ -15,7 +15,8 @@
 #
 
 # Comma-delimited list of branches to process
-branches='master,master-2.3,master-2.2,master-1.3.x'
+# Default will include all the branches present in the 'origin' remote
+branches=$(git ls-remote --heads origin | cut -d/ -f3 | paste -d, --serial)
 
 # Where to save the builds
 pathBuilds=/srv/www/builds

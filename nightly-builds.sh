@@ -40,7 +40,7 @@ export PHPENV_ROOT=/srv/phpenv
 # PHP version to use for builds (set with phpenv)
 # - version must be setup and compiled with 'phpenv install'
 # - to use the system's PHP version (i.e. don't use phpenv), set to blank
-PHPENV_phpVersion=7.0.17
+PHPENV_phpVersion=
 
 #------------------------------------------------------------------------------
 # Main

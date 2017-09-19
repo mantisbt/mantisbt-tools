@@ -141,8 +141,11 @@ def main():
 
                 # Copy PDF and TXT files (if built)
                 for filetype in ['pdf', 'txt']:
-                    for f in glob.glob(path.join(builddir, filetype, '*')):
-                        shutil.copy2(f, installdir)
+                    source = path.join(builddir, filetype, '*' + filetype)
+                    for sourcefile in glob.glob(source):
+                        dest = path.join(installdir, dir + '.' + filetype)
+                        print "Copying '%s' to '%s'" % (sourcefile, dest)
+                        shutil.copy2(sourcefile, dest)
 
             os.system('publican clean')
             print "\nBuild complete\n"

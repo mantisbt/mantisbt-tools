@@ -66,7 +66,7 @@ def git_current_branch():
 
 
 def git_checkout(branch):
-    os.system('git checkout -f %s' % branch)
+    os.system('git checkout -f %s >/dev/null' % branch)
 
 
 def main():

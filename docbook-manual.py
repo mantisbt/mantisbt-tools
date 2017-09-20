@@ -136,13 +136,15 @@ def main():
                         raise
 
                 # Copy HTML manuals with rsync
-                rsync = "rsync -a --delete %s %s" % (
-                    path.join(builddir, 'html*'), installdir
-                )
-                print rsync
-                ret = subprocess.call(rsync, shell=True)
-                if ret != 0:
-                    print 'ERROR: rsync call failed with exit code %i' % ret
+                source = path.join(builddir, 'html*')
+                if len(glob.glob(source)) > 0:
+                    rsync = "rsync -a --delete %s %s" % (
+                        source, installdir
+                    )
+                    print rsync
+                    ret = subprocess.call(rsync, shell=True)
+                    if ret != 0:
+                        print 'ERROR: rsync call failed with exit code %i' % ret
 
                 # Copy PDF and TXT files (if built)
                 for filetype in ['pdf', 'txt']:

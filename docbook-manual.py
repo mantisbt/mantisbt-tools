@@ -16,7 +16,7 @@ PUBLICAN = 'publican'
 
 # Script options
 options = "hda"
-long_options = ["help", "delete", "html", "pdf", "txt", "release", "all"]
+long_options = ["help", "delete", "epub", "html", "pdf", "txt", "release", "all"]
 
 
 def usage():
@@ -24,6 +24,7 @@ def usage():
 [<lang> ...]
     Options:  -h | --help           Print this usage message
               -d | --delete         Delete install directory before building
+                   --epub           Build EPUB manual
                    --html           Build HTML manual
                    --pdf            Build PDF manual
                    --txt            Build TXT manual
@@ -58,7 +59,11 @@ def main():
 
         elif opt in ("-a", "--all"):
             types[MAKE] = "html html_onefile html.tar.gz text pdf"
-            types[PUBLICAN] = "html,html-desktop,txt,pdf"
+            types[PUBLICAN] = "html,html-desktop,txt,pdf,epub"
+
+        elif opt == "--epub":
+            types[MAKE] = "epub"
+            types[PUBLICAN] = "epub"
 
         elif opt == "--html":
             types[MAKE] = "html html_onefile html.tar.gz"
@@ -146,11 +151,14 @@ def main():
                     if ret != 0:
                         print 'ERROR: rsync call failed with exit code %i' % ret
 
-                # Copy PDF and TXT files (if built)
-                for filetype in ['pdf', 'txt']:
-                    source = path.join(builddir, filetype, '*' + filetype)
+                # Copy single file manuals (PDF, TXT and EPUB)
+                for filetype in ['epub', 'pdf', 'txt']:
+                    if filetype == 'epub':
+                        source = path.join(builddir, '*.epub')
+                    else:
+                        source = path.join(builddir, filetype, '*' + filetype)
+                    dest = path.join(installdir, dir + '.' + filetype)
                     for sourcefile in glob.glob(source):
-                        dest = path.join(installdir, dir + '.' + filetype)
                         print "Copying '%s' to '%s'" % (sourcefile, dest)
                         shutil.copy2(sourcefile, dest)
 

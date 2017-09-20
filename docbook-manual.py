@@ -16,7 +16,7 @@ PUBLICAN = 'publican'
 
 # Script options
 options = "hda"
-long_options = ["help", "delete", "all", "pdf", "html", "release"]
+long_options = ["help", "delete", "html", "pdf", "txt", "release", "all"]
 
 
 def usage():
@@ -26,6 +26,7 @@ def usage():
               -d | --delete         Delete install directory before building
                    --html           Build HTML manual
                    --pdf            Build PDF manual
+                   --txt            Build TXT manual
                    --release        Build single file types used for
                                     release tarballs
               -a | --all            Build all manual types'''
@@ -66,6 +67,10 @@ def main():
         elif opt == "--pdf":
             types[MAKE] = "pdf"
             types[PUBLICAN] = types[MAKE]
+
+        elif opt == "--txt":
+            types[MAKE] = "text"
+            types[PUBLICAN] = "txt"
 
         elif opt == "--release":
             types[MAKE] = "html_onefile pdf text"

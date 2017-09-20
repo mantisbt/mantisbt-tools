@@ -16,7 +16,7 @@ PUBLICAN = 'publican'
 
 # Script options
 options = "hda"
-long_options = ["help", "delete", "all", "pdf", "html", "release"]
+long_options = ["help", "delete", "epub", "html", "pdf", "txt", "release", "all"]
 
 
 def usage():
@@ -24,8 +24,10 @@ def usage():
 [<lang> ...]
     Options:  -h | --help           Print this usage message
               -d | --delete         Delete install directory before building
+                   --epub           Build EPUB manual
                    --html           Build HTML manual
                    --pdf            Build PDF manual
+                   --txt            Build TXT manual
                    --release        Build single file types used for
                                     release tarballs
               -a | --all            Build all manual types'''
@@ -57,7 +59,11 @@ def main():
 
         elif opt in ("-a", "--all"):
             types[MAKE] = "html html_onefile html.tar.gz text pdf"
-            types[PUBLICAN] = "html,html-desktop,txt,pdf"
+            types[PUBLICAN] = "html,html-desktop,txt,pdf,epub"
+
+        elif opt == "--epub":
+            types[MAKE] = "epub"
+            types[PUBLICAN] = "epub"
 
         elif opt == "--html":
             types[MAKE] = "html html_onefile html.tar.gz"
@@ -66,6 +72,10 @@ def main():
         elif opt == "--pdf":
             types[MAKE] = "pdf"
             types[PUBLICAN] = types[MAKE]
+
+        elif opt == "--txt":
+            types[MAKE] = "text"
+            types[PUBLICAN] = "txt"
 
         elif opt == "--release":
             types[MAKE] = "html_onefile pdf text"
@@ -131,18 +141,26 @@ def main():
                         raise
 
                 # Copy HTML manuals with rsync
-                rsync = "rsync -a --delete %s %s" % (
-                    path.join(builddir, 'html*'), installdir
-                )
-                print rsync
-                ret = subprocess.call(rsync, shell=True)
-                if ret != 0:
-                    print 'ERROR: rsync call failed with exit code %i' % ret
+                source = path.join(builddir, 'html*')
+                if len(glob.glob(source)) > 0:
+                    rsync = "rsync -a --delete %s %s" % (
+                        source, installdir
+                    )
+                    print rsync
+                    ret = subprocess.call(rsync, shell=True)
+                    if ret != 0:
+                        print 'ERROR: rsync call failed with exit code %i' % ret
 
-                # Copy PDF and TXT files (if built)
-                for filetype in ['pdf', 'txt']:
-                    for f in glob.glob(path.join(builddir, filetype, '*')):
-                        shutil.copy2(f, installdir)
+                # Copy single file manuals (PDF, TXT and EPUB)
+                for filetype in ['epub', 'pdf', 'txt']:
+                    if filetype == 'epub':
+                        source = path.join(builddir, '*.epub')
+                    else:
+                        source = path.join(builddir, filetype, '*' + filetype)
+                    dest = path.join(installdir, dir + '.' + filetype)
+                    for sourcefile in glob.glob(source):
+                        print "Copying '%s' to '%s'" % (sourcefile, dest)
+                        shutil.copy2(sourcefile, dest)
 
             os.system('publican clean')
             print "\nBuild complete\n"

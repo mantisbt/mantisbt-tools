@@ -162,7 +162,7 @@ do
 
 	# Update Composer packages
 	echo "- Installing / Updating composer packages"
-	composer install
+	composer install --no-plugins --no-scripts
 
 	# Updating the version suffix in config file
 	echo "- Setting version_suffix to '$VERSION_SUFFIX' in $CONFIG_FILE"

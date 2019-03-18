@@ -23,7 +23,6 @@ exclude_list = (
     ".mailmap",
     ".travis.yml",
     "build.xml",
-    "web.config",
     # User custom files
     "config_inc.php",
     "custom_constant*_inc.php",

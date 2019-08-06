@@ -114,6 +114,15 @@ def main():
             count += 1
     print("  {0} plugin teams created".format(count))
 
+    # Checking for "orphan" teams
+    print("Checking for other, possibly orphan teams...")
+    count = 0
+    for team in teams:
+        search = team.replace('Plugin ', '').lower()
+        if not search in map(str.lower, org_repos):
+            print(' ', team)
+            count += 1
+    print("  {0} Teams to check".format(count))
 
     # Process Special teams and check that they grant access
     # to each of the org's repo; add appropriate access if not

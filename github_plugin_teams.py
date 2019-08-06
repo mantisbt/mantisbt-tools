@@ -22,9 +22,9 @@ def retrieve_org_repos(org):
     """
     Returns a list of all of the org's repositories
     """
-    repos = []
+    repos = {}
     for repo in org.get_repos():
-        repos.append(repo)
+        repos[repo.name] = repo
     return repos
 
 
@@ -106,7 +106,7 @@ def main():
     # Create it if it does not exist
     print("Checking for missing plugin teams...")
     count = 0
-    for repo in org_repos:
+    for repo in org_repos.values():
         team_name = 'Plugin ' + repo.name
         if not team_name.lower() in map(str.lower, teams):
             print("  Creating team for '{0}'".format(repo.name))
@@ -127,7 +127,7 @@ def main():
         print("    {0} found".format(len(team_repos)))
 
         print("  Checking for missing access")
-        for repo in org_repos:
+        for repo in org_repos.values():
             if repo.id not in team_repos:
                 count += 1
                 print("  Grant {0} access to plugin '{1}'".format(

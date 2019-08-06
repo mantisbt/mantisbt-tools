@@ -110,7 +110,7 @@ def main():
         team_name = 'Plugin ' + repo.name
         if not team_name.lower() in map(str.lower, teams):
             print("  Creating team for '{0}'".format(repo.name))
-            new_team = org.create_team(team_name, [repo], 'push')
+            new_team = org.create_team(team_name, [repo], 'push', 'closed')
             count += 1
     print("  {0} plugin teams created".format(count))
 

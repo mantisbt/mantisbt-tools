@@ -1,7 +1,11 @@
 #!/usr/bin/python3 -u
 """
-Uses Github API to grant write access to all of mantisbt-plugins organization
-to the teams specified in config file
+Helper script for mantisbt-plugins organization maintenance
+
+Uses Github API to
+- Create a team for each plugin, granting push access to it
+- grant the "Special" teams specified in config file access to all plugins
+  in the organization
 """
 
 import sys

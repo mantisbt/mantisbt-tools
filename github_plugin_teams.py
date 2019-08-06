@@ -98,6 +98,19 @@ def main():
     org_repos = retrieve_org_repos(org)
     print("  {0} found".format(len(org_repos)))
 
+    # Each repo should have a corresponding team granting push access to it.
+    # Create it if it does not exist
+    print("Checking for missing plugin teams...")
+    count = 0
+    for repo in org_repos:
+        team_name = 'Plugin ' + repo.name
+        if not team_name in teams:
+            print("  Creating team for '{0}'".format(repo.name))
+            new_team = org.create_team(team_name, [repo], 'push')
+            count += 1
+    print("  {0} plugin teams created".format(count))
+
+
     # Process Special teams and check that they grant access
     # to each of the org's repo; add appropriate access if not
     for team in config_teams.values():

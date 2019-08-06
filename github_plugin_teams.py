@@ -124,7 +124,7 @@ def main():
 
         print("  Retrieving repositories...",)
         team_repos = retrieve_team_repos(team)
-        print(len(team_repos), "found")
+        print("    {0} found".format(len(team_repos)))
 
         print("  Checking for missing access")
         for repo in org_repos:

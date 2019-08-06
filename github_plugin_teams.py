@@ -75,7 +75,7 @@ def main():
     org = g.get_organization(config.ORG_PLUGINS)
 
     # Organization Teams
-    print("Retrieving teams...",)
+    print("Retrieving teams...", end=' ')
     try:
         teams = retrieve_teams(org)
     except GithubException as err:
@@ -87,20 +87,20 @@ def main():
         else:
             print("Unknown error", (err))
         sys.exit(1)
-    print("  {0} teams found in the organization".format(len(teams)))
+    print(len(teams), "found", end=', ')
 
     # Special teams with access to all repos
     config_teams = retrieve_config_teams(teams)
-    print("  {0} global teams configured".format(len(config_teams)))
+    print(len(config_teams), "global teams configured")
 
     # Remove special teams from global teams list
     for team in config_teams.keys():
         teams.pop(team)
 
     # Repositories
-    print("Retrieving the organization's repositories...",)
+    print("Retrieving the organization's repositories...", end=' ')
     org_repos = retrieve_org_repos(org)
-    print("  {0} found".format(len(org_repos)))
+    print("{0} found".format(len(org_repos)))
 
     # Each repo should have a corresponding team granting push access to it.
     # Create it if it does not exist
@@ -122,9 +122,9 @@ def main():
         count = 0
         access = cfg.github['teams'][team.name]
 
-        print("  Retrieving repositories...",)
+        print("  Retrieving repositories...", end=' ')
         team_repos = retrieve_team_repos(team)
-        print("    {0} found".format(len(team_repos)))
+        print("{0} found".format(len(team_repos)))
 
         print("  Checking for missing access")
         for repo in org_repos.values():

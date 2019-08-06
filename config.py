@@ -1,4 +1,4 @@
-#!/usr/bin/python -u
+#!/usr/bin/python3 -u
 """
 Configuration for various MantisBT utility scripts
 """
@@ -27,7 +27,7 @@ def __update(base, upd):
     """
     Recursively update 'base' dict with corresponding values in 'upd'
     """
-    for key, value in upd.iteritems():
+    for key, value in upd.items():
         if isinstance(value, collections.Mapping):
             base[key] = __update(base.get(key, {}), value)
         else:
@@ -42,11 +42,11 @@ def __read_config():
 
     # Read default configuration values
     with open("config_defaults.yml", 'r') as ymlfile:
-        cfg = yaml.load(ymlfile)
+        cfg = yaml.load(ymlfile, Loader=yaml.BaseLoader)
 
     # Read local settings
     with open("config.yml", 'r') as ymlfile:
-        cfg = __update(cfg, yaml.load(ymlfile))
+        cfg = __update(cfg, yaml.load(ymlfile, Loader=yaml.BaseLoader))
 
     return Config(cfg)
 

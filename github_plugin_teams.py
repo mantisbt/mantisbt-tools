@@ -26,21 +26,29 @@ def retrieve_org_repos(org):
 
 def retrieve_teams(org):
     """
-    Returns a list of Team objects for the names defined in github_teams
-    that have fewer repositories than the specified organization
+    Returns a list of all Teams in the specified organization
     """
     teams = {}
     for team in org.get_teams():
-        if team.name in cfg.github['teams']:
-            teams[team.name] = team
+        teams[team.name] = team
+    return teams
 
-    # Check for invalid team names in config file
-    invalid = set(cfg.github['teams']) - set(teams)
+
+def retrieve_config_teams(org_teams):
+    """
+    Returns a list of Team objects for the ones defined in github.teams config
+    """
+    config_teams = {}
+    invalid = []
+    for team in cfg.github['teams']:
+        try:
+            config_teams[team] = org_teams[team]
+        except KeyError as err:
+            invalid.append(team)
     if invalid:
         print("Unknown teams specified in configuration:", ', '.join(invalid))
         sys.exit(1)
-
-    return teams
+    return config_teams
 
 
 def retrieve_team_repos(team):
@@ -62,7 +70,7 @@ def main():
     print("Retrieving organization '{0}'".format(config.ORG_PLUGINS))
     org = g.get_organization(config.ORG_PLUGINS)
 
-    # Teams
+    # Organization Teams
     print("Retrieving teams...",)
     try:
         teams = retrieve_teams(org)
@@ -75,16 +83,24 @@ def main():
         else:
             print("Unknown error", (err))
         sys.exit(1)
-    print(len(teams), "found")
+    print("  {0} teams found in the organization".format(len(teams)))
+
+    # Special teams with access to all repos
+    config_teams = retrieve_config_teams(teams)
+    print("  {0} global teams configured".format(len(config_teams)))
+
+    # Remove special teams from global teams list
+    for team in config_teams.keys():
+        teams.pop(team)
 
     # Repositories
     print("Retrieving the organization's repositories...",)
     org_repos = retrieve_org_repos(org)
-    print(len(org_repos), "found")
+    print("  {0} found".format(len(org_repos)))
 
-    # Check that the team grants access to each of the org's repo
-    # Add write access if not
-    for team in teams.values():
+    # Process Special teams and check that they grant access
+    # to each of the org's repo; add appropriate access if not
+    for team in config_teams.values():
         print("Processing team '{0}'".format(team.name))
         count = 0
         access = cfg.github['teams'][team.name]

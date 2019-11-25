@@ -140,7 +140,7 @@ def main():
         refs.extend(os.popen('git branch -r').read().split())
 
     if len(refs) < 1:
-        refs.extend(os.popen('git log --pretty="format:%h" -n1').read())
+        refs.append(os.popen('git log --pretty="format:%h" -n1').read())
 
     refs = [ref for ref in refs if not ignore(ref)]
 

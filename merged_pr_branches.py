@@ -61,20 +61,22 @@ def main():
                                            author_repo.full_name))
 
     # Retrieve the list of all merged PRs submitted by given author in the
-    # target organization's repository
+    # target organization's repository with a matching target branch
     target_repo = get_repo(target_org, repo_name)
-    merged_pr = gh.search_issues(query='', **{
+    query = ' '.join('head:' + b for b in branches)
+    qualifiers = {
         'repo': target_repo.full_name,
         'author': author,
         'type': 'pr',
         'is': 'merged'
-        })
+        }
+    merged_pr = gh.search_issues(query=query, **qualifiers)
     if merged_pr.totalCount == 0:
-        print("No merged PR by {1} found in {0}"
+        print("No matching merged PR by {1} found in {0}"
               .format(target_repo.full_name, author))
         return
     else:
-        print('{} merged pull requests found in {}'
+        print('{} matching merged pull requests found in {}'
               .format(merged_pr.totalCount, target_repo.full_name))
 
     print('Retrieving corresponding head branches (this may take a while)...')

@@ -13,6 +13,7 @@ repository. If one or more matching references are found, it prints a command
 that can be used to delete the no-longer needed branches.
 """
 
+import getopt
 import os
 from os import path
 import subprocess
@@ -21,15 +22,67 @@ import sys
 # Github module https://github.com/jacquev6/PyGithub
 from github import Github, GithubException
 
-# Edit the variables below as appropriate
-# The GitHub token must have 'public_repo' scope
-github_token = None
+# Default values for command-line options - Edit as appropriate
 # GitHub ID of the target org
 target_org = 'mantisbt'
 # Repository name
 repo_name = 'mantisbt'
 # GitHub ID of the PR's author
-author = ''
+author = None
+
+# The GitHub token must have 'public_repo' scope
+github_token = None
+
+# Command-line options
+short_options = "hr:t:"
+long_options = ["help", "author=", "repository=", "target="]
+
+
+def get_options():
+    '''
+    Process command-line options.
+    Option values are stored in global variables below.
+    '''
+    global repo_name, target_org, author
+
+    def usage():
+        print('''Identifies branches merged via pull request still present in a repository
+
+Usage: {0} [options] <author>
+
+Options:
+    -h | --help               Show this usage message
+
+    -r | --repository <repo>  Repository name (default: {1})
+    -t | --target <name>      GitHub ID of the target org/user (default: {2})
+'''
+              .format(path.basename(__file__), repo_name, target_org))
+    # end usage()
+
+    try:
+        opts, args = getopt.gnu_getopt(sys.argv[1:],
+                                       short_options,
+                                       long_options)
+    except getopt.GetoptError as err:
+        print(err)
+        usage()
+        sys.exit(2)
+
+    # Author is mandatory
+    if len(args) < 1:
+        usage()
+        sys.exit(1)
+    author = args[0]
+
+    # Process options
+    for opt, val in opts:
+        if opt in ("-h", "--help"):
+            usage()
+            sys.exit(0)
+        elif opt in ("-r", "--repository"):
+            repo_name = val
+        elif opt in ("-t", "--target"):
+            target_org = val
 
 
 def get_repo(user, repo):
@@ -48,6 +101,8 @@ def get_repo(user, repo):
 
 
 def main():
+    opt = get_options()
+
     print('Connecting to GitHub')
     global gh
     gh = Github(github_token)

@@ -86,16 +86,20 @@ def main():
         merged_branches[pr.head.ref] = pr.number
 
     print('Identifying merged branches that could be deleted')
-    print()
-    print('Branch,Merged in PR')
-    count = 0
+    branches_to_delete = []
     for branch in branches:
         if branch in merged_branches:
-            count += 1
-            print('{},{}'.format(branch, merged_branches[branch]))
+            branches_to_delete.append(branch)
     print()
-    print('{} branches in {} have been merged in {}'
-          .format(count, author_repo.full_name, target_repo.full_name))
+    print('{0} branches successfully merged in {2} are still present in {1}'
+          .format(len(branches_to_delete),
+                  author_repo.full_name,
+                  target_repo.full_name))
+    print("Execute the following commands to delete them")
+    print("REMOTE=###")
+    print("git push $REMOTE --delete " + ' '.join(branches_to_delete))
+    print("git fetch $REMOTE --prune")
+
 
 if __name__ == "__main__":
     main()

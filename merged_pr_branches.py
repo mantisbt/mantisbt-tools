@@ -69,8 +69,13 @@ def main():
         'type': 'pr',
         'is': 'merged'
         })
-    print('{} merged pull requests found in {}'
-          .format(merged_pr.totalCount, target_repo.full_name))
+    if merged_pr.totalCount == 0:
+        print("No merged PR by {1} found in {0}"
+              .format(target_repo.full_name, author))
+        return
+    else:
+        print('{} merged pull requests found in {}'
+              .format(merged_pr.totalCount, target_repo.full_name))
 
     print('Retrieving corresponding head branches (this may take a while)...')
     merged_branches = {}

@@ -1,4 +1,4 @@
-#!/usr/bin/python -u
+#!/usr/bin/python3 -u
 """
 Retrieve a list of branches that can safely be deleted.
 
@@ -22,10 +22,14 @@ import sys
 from github import Github, GithubException
 
 # Edit the variables below as appropriate
+# The GitHub token must have 'public_repo' scope
 github_token = None
-target_org = 'mantisbt' # GitHub ID of the target org
-author = ''             # GitHub ID of the PR's author
-repo_name = 'mantisbt'  # Repository name
+# GitHub ID of the target org
+target_org = 'mantisbt'
+# Repository name
+repo_name = 'mantisbt'
+# GitHub ID of the PR's author
+author = ''
 
 
 def get_repo(user, repo):
@@ -51,7 +55,8 @@ def main():
     # Retrieve the list of branches in the author's repository
     author_repo = get_repo(author, repo_name)
     refs = author_repo.get_git_refs()
-    branches = list(ref.ref.replace('refs/heads/', '') for ref in refs if ref.ref.startswith('refs/heads/'))
+    branches = list(ref.ref.replace('refs/heads/', '')
+                    for ref in refs if ref.ref.startswith('refs/heads/'))
     print('{} branches found in {}'.format(len(branches),
                                            author_repo.full_name))
 
@@ -59,29 +64,29 @@ def main():
     # target organization's repository
     target_repo = get_repo(target_org, repo_name)
     merged_pr = gh.search_issues(query='', **{
-        'repo':target_repo.full_name,
-        'author':author,
-        'type':'pr',
-        'is':'merged'
+        'repo': target_repo.full_name,
+        'author': author,
+        'type': 'pr',
+        'is': 'merged'
         })
     print('{} merged pull requests found in {}'
           .format(merged_pr.totalCount, target_repo.full_name))
 
-    print 'Retrieving corresponding head branches (this may take a while)...'
+    print('Retrieving corresponding head branches (this may take a while)...')
     merged_branches = {}
     for pr in merged_pr:
         pr = pr.as_pull_request()
         merged_branches[pr.head.ref] = pr.number
 
-    print 'Identifying merged branches that could be deleted'
-    print
-    print 'Branch,Merged in PR'
+    print('Identifying merged branches that could be deleted')
+    print()
+    print('Branch,Merged in PR')
     count = 0
     for branch in branches:
         if branch in merged_branches:
             count += 1
-            print '{},{}'.format(branch, merged_branches[branch])
-    print
+            print('{},{}'.format(branch, merged_branches[branch]))
+    print()
     print('{} branches in {} have been merged in {}'
           .format(count, author_repo.full_name, target_repo.full_name))
 

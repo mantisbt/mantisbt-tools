@@ -90,15 +90,19 @@ def main():
     for branch in branches:
         if branch in merged_branches:
             branches_to_delete.append(branch)
-    print()
-    print('{0} branches successfully merged in {2} are still present in {1}'
-          .format(len(branches_to_delete),
-                  author_repo.full_name,
-                  target_repo.full_name))
-    print("Execute the following commands to delete them")
-    print("REMOTE=###")
-    print("git push $REMOTE --delete " + ' '.join(branches_to_delete))
-    print("git fetch $REMOTE --prune")
+    if len(branches_to_delete) > 0:
+        print('{0} branches successfully merged in {2} still present in {1}'
+              .format(len(branches_to_delete),
+                      author_repo.full_name,
+                      target_repo.full_name))
+        print()
+        print("Execute the following commands to delete them")
+        print("REMOTE=###")
+        print("git push $REMOTE --delete " + ' '.join(branches_to_delete))
+        print("git fetch $REMOTE --prune")
+    else:
+        print('No merged branches were found in {0}'
+              .format(author_repo.full_name))
 
 
 if __name__ == "__main__":

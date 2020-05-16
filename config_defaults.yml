@@ -11,5 +11,13 @@
 #
 github:
     # API user ID and password - default to anonymous access
+    # NOTE: Accessing the GitHub API with user/password is deprecated since
+    # 2020-02-14 and will be removed on 2020-11-13.
+    # https://developer.github.com/changes/2020-02-14-deprecating-password-auth/
     user:         None
     password:     None
+
+    # Personal access token
+    # Generate at https://github.com/settings/tokens
+    # The token must have at least `public_repo` scope
+    token: None

@@ -27,11 +27,12 @@ def __update(base, upd):
     """
     Recursively update 'base' dict with corresponding values in 'upd'
     """
-    for key, value in upd.items():
-        if isinstance(value, collections.Mapping):
+    if (isinstance(base, collections.Mapping) and
+            isinstance(upd, collections.Mapping)):
+        for key, value in upd.items():
             base[key] = __update(base.get(key, {}), value)
-        else:
-            base[key] = upd[key]
+    elif upd is not None:
+        return upd
     return base
 
 

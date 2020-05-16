@@ -22,6 +22,9 @@ import sys
 # Github module https://github.com/jacquev6/PyGithub
 from github import Github, GithubException
 
+# MantisBT scripts config
+from config import cfg
+
 # Default values for command-line options - Edit as appropriate
 # GitHub ID of the target org
 target_org = 'mantisbt'
@@ -29,9 +32,6 @@ target_org = 'mantisbt'
 repo_name = 'mantisbt'
 # GitHub ID of the PR's author
 author = None
-
-# The GitHub token must have 'public_repo' scope
-github_token = None
 
 # Command-line options
 short_options = "hr:t:"
@@ -105,7 +105,7 @@ def main():
 
     print('Connecting to GitHub')
     global gh
-    gh = Github(github_token)
+    gh = Github(cfg.github['token'])
 
     # Retrieve the list of branches in the author's repository
     author_repo = get_repo(author, repo_name)

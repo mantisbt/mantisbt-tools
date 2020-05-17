@@ -3,6 +3,7 @@
 Configuration for various MantisBT utility scripts
 """
 
+from pathlib import Path
 import yaml
 import collections
 
@@ -40,14 +41,15 @@ def __read_config():
     """
     Read YML config files and return the data
     """
+    path = Path(__file__).parent.resolve()
 
     # Read default configuration values
-    with open("config_defaults.yml", 'r') as ymlfile:
+    with open(Path.joinpath(path, "config_defaults.yml"), 'r') as ymlfile:
         cfg = yaml.load(ymlfile)
 
     # Read local settings
     try:
-        with open("config.yml", 'r') as ymlfile:
+        with open(Path.joinpath(path, "config.yml"), 'r') as ymlfile:
             cfg = __update(cfg, yaml.load(ymlfile))
     except FileNotFoundError:
         pass

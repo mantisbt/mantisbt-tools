@@ -13,19 +13,18 @@ import subprocess
 # Github module https://github.com/jacquev6/PyGithub
 from github import Github
 
-# Edit the variables below as appropriate
-github_user = None
-github_password = None
-github_org = 'mantisbt-plugins'
+# MantisBT scripts config
+import config
+from config import cfg
 
-github_api = 'https://api.github.com'
+github_org = config.ORG_PLUGINS
 
 
 def main():
     print "Retrieving all plugins from '%s' organization" % github_org
 
-    print "Connecting to Github as '%s'" % github_user
-    gh = Github(github_user, github_password)
+    print "Connecting to Github"
+    gh = Github(cfg.github['token'])
     org = gh.get_organization(github_org)
 
     # Process all repos

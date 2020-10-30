@@ -16,7 +16,8 @@
 
 # Comma-delimited list of branches to process
 # If blank, all branches present in the 'origin' remote will be processed
-branches=
+# Use '*' as wildcard to match branch names, e.g. master*, *1.3*
+branches="master*"
 
 # Path to reference MantisBT repository
 # This is used to build the branches list when not specified
@@ -88,8 +89,8 @@ then
 	fi
 fi
 
-# No branches specified, get the list from the reference repo
-if [[ -z "$branches" ]]
+# No branches or wildcard specified, get the list from the reference repo
+if [[ -z "$branches" || "$branches" =~ \* ]]
 then
 	echo "$(date +'%F %T') Retrieving branches from MantisBT repo in $pathRepo" |tee -a $logfile
 
@@ -101,9 +102,20 @@ then
 	fi
 
 	tempfile=$(mktemp)
+	# Make sure the origin remote exists
 	if git remote show origin -n 2>$tempfile >/dev/null
 	then
-		branches=$(git ls-remote --heads origin | cut -d/ -f3 | paste -d, --serial)
+		if [[ "$branches" =~ ',' ]]
+		then
+			# Branches list contains multiple entries
+			refList=$(eval echo "refs/heads/{$branches}")
+		elif [[ -n "$branches" ]]
+		then
+			refList="refs/heads/$branches"
+		else
+			refList=""
+		fi
+		branches=$(git ls-remote --heads origin $refList | cut -d/ -f3- | paste -d, --serial)
 	else
 		cat $tempfile |tee -a $logfile
 	fi

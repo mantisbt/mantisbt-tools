@@ -30,10 +30,10 @@ pathBuilds=/srv/www/builds
 numToKeep=2
 
 # Location of release build scripts
-pathTools=$(dirname $(readlink -e $0))
+pathTools=$(dirname "$(readlink -e $0)")
 
 # Log file - set to /dev/null for no log
-logfile=/var/log/$(basename $0 .sh).log
+logfile=/var/log/$(basename "$0" .sh).log
 #logfile=/dev/null
 
 # Key extension used to determine old releases to delete
@@ -59,7 +59,7 @@ then
 fi
 
 # Start logging
-cat <<-EOF >>$logfile
+cat <<-EOF >>"$logfile"
 
 	------------------------------------------------------------------------
 	$(date +"%F %T") - Building release tarballs
@@ -76,11 +76,11 @@ then
 
 	if [ "$PHPENV_phpVersion" != "$PHPENV_oldVersion" ]
 	then
-		echo "$(date +'%F %T') phpenv: setting PHP version to '$PHPENV_phpVersion'" |tee -a $logfile
-		phpenv global $PHPENV_phpVersion 2>&1 >/dev/null |tee -a $logfile
+		echo "$(date +'%F %T') phpenv: setting PHP version to '$PHPENV_phpVersion'" |tee -a "$logfile"
+		phpenv global $PHPENV_phpVersion 2>&1 >/dev/null |tee -a "$logfile"
 
 		# Make sure the version was actually set
-		if [ "$(set -- $(phpenv version); echo $1)" != "$PHPENV_phpVersion" ]
+		if [ "$(set -- "$(phpenv version)"; echo "$1")" != "$PHPENV_phpVersion" ]
 		then
 			exit 1;
 		fi
@@ -92,18 +92,17 @@ fi
 # No branches or wildcard specified, get the list from the reference repo
 if [[ -z "$branches" || "$branches" =~ \* ]]
 then
-	echo "$(date +'%F %T') Retrieving branches from MantisBT repo in $pathRepo" |tee -a $logfile
+	echo "$(date +'%F %T') Retrieving branches from MantisBT repo in $pathRepo" |tee -a "$logfile"
 
-	cd $pathRepo
-	if [[ $? != 0 ]]
+	if ! cd $pathRepo
 	then
-		echo "ERROR: invalid directory $pathRepo" >>$logfile
+		echo "ERROR: invalid directory $pathRepo" >>"$logfile"
 		exit 1
 	fi
 
 	tempfile=$(mktemp)
 	# Make sure the origin remote exists
-	if git remote show origin -n 2>$tempfile >/dev/null
+	if git remote show origin -n 2>"$tempfile" >/dev/null
 	then
 		if [[ "$branches" =~ ',' ]]
 		then
@@ -117,57 +116,59 @@ then
 		fi
 		branches=$(git ls-remote --heads origin $refList | cut -d/ -f3- | paste -d, --serial)
 	else
-		cat $tempfile |tee -a $logfile
+		cat "$tempfile" |tee -a "$logfile"
 	fi
 	rm $tempfile
 	[[ -z "$branches" ]] && exit 1
 fi
 
 # Remove any builds not part of the branches list
-echo "$(date +'%F %T') Deleting old builds not part of branches list" |tee -a $logfile
+echo "$(date +'%F %T') Deleting old builds not part of branches list" |tee -a "$logfile"
 find $pathBuilds -maxdepth 1 -name 'mantisbt*' |
 	grep -vE -- "-(${branches//,/|})-[0-9a-f]{7}" |
-	xargs --no-run-if-empty rm -r 2>&1 |tee -a $logfile
+	xargs --no-run-if-empty rm -r 2>&1 |tee -a "$logfile"
 
 # Build the tarballs
-echo "$(date +'%F %T') Generating nightly builds for branches: $branches" |tee -a $logfile
-refList=$(eval echo origin/{$branches})
+echo "$(date +'%F %T') Generating nightly builds for branches: $branches" |tee -a "$logfile"
+refList=$(eval echo "origin/{$branches}")
 if [[ $branches == *,* ]]
 then
-	refList=$(eval echo origin/{$branches})
+	refList=$(eval echo "origin/{$branches}")
 else
 	refList=origin/$branches
 fi
-$pathTools/buildrelease-repo.py --auto-suffix --ref ${refList// /,} --fresh --docbook $pathBuilds 2>&1 |tee -a $logfile
-echo >>$logfile
+$pathTools/buildrelease-repo.py --auto-suffix --ref ${refList// /,} --fresh --docbook $pathBuilds 2>&1 |tee -a "$logfile"
+echo >>"$logfile"
 
 
 # Delete old nightly builds
-echo "Keeping only the most recent $numToKeep builds" |tee -a $logfile
+echo "Keeping only the most recent $numToKeep builds" |tee -a "$logfile"
+# shellcheck disable=SC2164
 cd $pathBuilds
 for branch in ${branches//,/ }
 do
 	echo "  Processing '$branch' branch"
 	# List files by date, grep for branch with shortened MD5 pattern and key
 	# extension, and use tail to keep desired number
+	# shellcheck disable=SC2010
 	ls -t | grep -P "$branch-[0-9a-f]{7}$keyExt$" | tail -n +$(($numToKeep + 1)) |
 	while read build
 	do
-		fileSpec=$(basename $build $keyExt)
+		fileSpec=$(basename "$build" $keyExt)
 		echo "    Deleting files for $fileSpec"
 		rm -r $fileSpec*
 	done
-done |tee -a $logfile
-echo >>$logfile
+done |tee -a "$logfile"
+echo >>"$logfile"
 
 
 # Restore phpenv if necessary
 if [ -n "$PHPENV_oldVersion" ]
 then
-	echo "$(date +'%F %T') phpenv: restoring PHP version" |tee -a $logfile
+	echo "$(date +'%F %T') phpenv: restoring PHP version" |tee -a "$logfile"
 	phpenv global $PHPENV_phpVersion
 fi
 
 # All done !
-echo "$(date +'%F %T') Build complete !" |tee -a $logfile
+echo "$(date +'%F %T') Build complete !" |tee -a "$logfile"
 echo "Review logfile in $logfile"

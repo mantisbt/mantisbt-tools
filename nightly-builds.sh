@@ -77,7 +77,7 @@ then
 	if [ "$PHPENV_phpVersion" != "$PHPENV_oldVersion" ]
 	then
 		echo "$(date +'%F %T') phpenv: setting PHP version to '$PHPENV_phpVersion'" |tee -a "$logfile"
-		phpenv global $PHPENV_phpVersion 2>&1 >/dev/null |tee -a "$logfile"
+		phpenv global "$PHPENV_phpVersion" 2>&1 >/dev/null |tee -a "$logfile"
 
 		# Make sure the version was actually set
 		if [ "$(set -- "$(phpenv version)"; echo "$1")" != "$PHPENV_phpVersion" ]
@@ -114,11 +114,11 @@ then
 		else
 			refList=""
 		fi
-		branches=$(git ls-remote --heads origin $refList | cut -d/ -f3- | paste -d, --serial)
+		branches=$(git ls-remote --heads origin "$refList" | cut -d/ -f3- | paste -d, --serial)
 	else
 		cat "$tempfile" |tee -a "$logfile"
 	fi
-	rm $tempfile
+	rm "$tempfile"
 	[[ -z "$branches" ]] && exit 1
 fi
 
@@ -137,7 +137,7 @@ then
 else
 	refList=origin/$branches
 fi
-$pathTools/buildrelease-repo.py --auto-suffix --ref ${refList// /,} --fresh --docbook $pathBuilds 2>&1 |tee -a "$logfile"
+$pathTools/buildrelease-repo.py --auto-suffix --ref "${refList// /,}" --fresh --docbook $pathBuilds 2>&1 |tee -a "$logfile"
 echo >>"$logfile"
 
 
@@ -150,13 +150,13 @@ do
 	echo "  Processing '$branch' branch"
 	# List files by date, grep for branch with shortened MD5 pattern and key
 	# extension, and use tail to keep desired number
-	# shellcheck disable=SC2010
+	# shellcheck disable=SC2004,SC2010
 	ls -t | grep -P "$branch-[0-9a-f]{7}$keyExt$" | tail -n +$(($numToKeep + 1)) |
-	while read build
+	while read -r build
 	do
 		fileSpec=$(basename "$build" $keyExt)
 		echo "    Deleting files for $fileSpec"
-		rm -r $fileSpec*
+		rm -r "$fileSpec*"
 	done
 done |tee -a "$logfile"
 echo >>"$logfile"
@@ -166,7 +166,7 @@ echo >>"$logfile"
 if [ -n "$PHPENV_oldVersion" ]
 then
 	echo "$(date +'%F %T') phpenv: restoring PHP version" |tee -a "$logfile"
-	phpenv global $PHPENV_phpVersion
+	phpenv global "$PHPENV_phpVersion"
 fi
 
 # All done !

@@ -151,7 +151,7 @@ do
 	# List files by date, grep for branch with shortened MD5 pattern and key
 	# extension, and use tail to keep desired number
 	# shellcheck disable=SC2004,SC2010
-	ls -t | grep -P "$branch-[0-9a-f]{7}$keyExt$" | tail -n +$(($numToKeep + 1)) |
+	ls -t | grep -P "$branch-[0-9a-f]+$keyExt$" | tail -n +$(($numToKeep + 1)) |
 	while read -r build
 	do
 		fileSpec=$(basename "$build" $keyExt)

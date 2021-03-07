@@ -145,7 +145,7 @@ do
 	# If we're on a release tag, then the suffix is blank
 	unset VERSION_SUFFIX
 	git describe $TARGET_REF --exact-match >/dev/null 2>&1 ||
-		VERSION_SUFFIX=-$UPDATE_BRANCH-$(git log -n 1 --format="%h" $TARGET_REF)
+		VERSION_SUFFIX=-$UPDATE_BRANCH-$(git rev-parse --short $TARGET_REF)
 
 	# If the repository-specific branch exists, we rebase it on the top of the
 	# reference branch

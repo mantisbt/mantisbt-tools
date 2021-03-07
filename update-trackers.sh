@@ -119,7 +119,7 @@ do
 		process_error "repository '$REPO' does not exist in '$DIR_NAME' or is not accessible"
 
 	# Detect if there are unstaged changes in the repository's current branch
-	if git diff-index --name-status --exit-code HEAD
+	if ! git diff-index --name-status --exit-code HEAD
 	then
 		echo -e "\nThere are unstaged changes"
 		read -r -n 1 -p "Would you like to discard them ? "

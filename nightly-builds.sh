@@ -30,7 +30,7 @@ pathBuilds=/srv/www/builds
 numToKeep=2
 
 # Location of release build scripts
-pathTools=$(dirname "$(readlink -e $0)")
+pathTools=/srv/mantisbt/build
 
 # Log file - set to /dev/null for no log
 logfile=/var/log/$(basename "$0" .sh).log
@@ -156,7 +156,8 @@ do
 	do
 		fileSpec=$(basename "$build" $keyExt)
 		echo "    Deleting files for $fileSpec"
-		rm -r "$fileSpec*"
+		# shellcheck disable=SC2086
+		rm -r $fileSpec*
 	done
 done |tee -a "$logfile"
 echo >>"$logfile"

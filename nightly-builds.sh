@@ -48,6 +48,19 @@ export PHPENV_ROOT=/srv/phpenv
 # - to use the system's PHP version (i.e. don't use phpenv), set to blank
 PHPENV_phpVersion=
 
+
+#------------------------------------------------------------------------------
+# Functions
+#
+
+function log()
+{
+    DATE=$(date +"%F %T")
+    echo "$@"
+    echo "$DATE  $*" >>"$logfile"
+}
+
+
 #------------------------------------------------------------------------------
 # Main
 #
@@ -76,7 +89,7 @@ then
 
 	if [ "$PHPENV_phpVersion" != "$PHPENV_oldVersion" ]
 	then
-		echo "$(date +'%F %T') phpenv: setting PHP version to '$PHPENV_phpVersion'" |tee -a "$logfile"
+		log "phpenv: setting PHP version to '$PHPENV_phpVersion'"
 		phpenv global "$PHPENV_phpVersion" 2>&1 >/dev/null |tee -a "$logfile"
 
 		# Make sure the version was actually set
@@ -92,7 +105,7 @@ fi
 # No branches or wildcard specified, get the list from the reference repo
 if [[ -z "$branches" || "$branches" =~ \* ]]
 then
-	echo "$(date +'%F %T') Retrieving branches from MantisBT repo in $pathRepo" |tee -a "$logfile"
+	log "Retrieving branches from MantisBT repo in $pathRepo"
 
 	if ! cd $pathRepo
 	then
@@ -123,13 +136,13 @@ then
 fi
 
 # Remove any builds not part of the branches list
-echo "$(date +'%F %T') Deleting old builds not part of branches list" |tee -a "$logfile"
+log "Deleting old builds not part of branches list"
 find $pathBuilds -maxdepth 1 -name 'mantisbt*' |
 	grep -vE -- "-(${branches//,/|})-[0-9a-f]{7}" |
 	xargs --no-run-if-empty rm -r 2>&1 |tee -a "$logfile"
 
 # Build the tarballs
-echo "$(date +'%F %T') Generating nightly builds for branches: $branches" |tee -a "$logfile"
+log "Generating nightly builds for branches: $branches"
 refList=$(eval echo "origin/{$branches}")
 if [[ $branches == *,* ]]
 then
@@ -166,10 +179,10 @@ echo >>"$logfile"
 # Restore phpenv if necessary
 if [ -n "$PHPENV_oldVersion" ]
 then
-	echo "$(date +'%F %T') phpenv: restoring PHP version" |tee -a "$logfile"
+	log "phpenv: restoring PHP version"
 	phpenv global "$PHPENV_phpVersion"
 fi
 
 # All done !
-echo "$(date +'%F %T') Build complete !" |tee -a "$logfile"
+log "Build complete !"
 echo "Review logfile in $logfile"

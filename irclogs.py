@@ -15,7 +15,7 @@ from os import path
 # ---------------------------------------------------------------------
 
 # Directory where ChannelLogger stores the raw IRC logs
-source = '/home/supybot/mantisbot/logs/ChannelLogger'
+source_dir = '/home/supybot/mantisbot/logs/ChannelLogger'
 
 # Web server directory from which the html pages are served
 target_dir = '/srv/www/irclogs'
@@ -30,7 +30,7 @@ def log(msg):
     """
     Prints log message with timestamp
     """
-    print("%s  %s".format(
+    print("{}  {}".format(
         datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         msg
     ))

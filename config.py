@@ -45,12 +45,12 @@ def __read_config():
 
     # Read default configuration values
     with open(Path.joinpath(path, "config_defaults.yml"), 'r') as ymlfile:
-        cfg = yaml.load(ymlfile)
+        cfg = yaml.safe_load(ymlfile)
 
     # Read local settings
     try:
         with open(Path.joinpath(path, "config.yml"), 'r') as ymlfile:
-            cfg = __update(cfg, yaml.load(ymlfile))
+            cfg = __update(cfg, yaml.safe_load(ymlfile))
     except FileNotFoundError:
         pass
 

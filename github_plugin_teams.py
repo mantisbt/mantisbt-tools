@@ -67,8 +67,8 @@ def retrieve_team_repos(team):
 
 
 def main():
-    print("Connecting to Github as '{0}'".format(cfg.github['user']))
-    g = Github(cfg.github['user'], cfg.github['password'])
+    print("Connecting to Github")
+    g = Github(cfg.github['token'])
 
     # Organization
     print("Retrieving organization '{0}'".format(config.ORG_PLUGINS))

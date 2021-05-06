@@ -70,6 +70,23 @@ def main():
     print("Connecting to Github")
     gh = Github(cfg.github['token'])
 
+    # For some reason, we need some dummy API call to ensure oauth_scopes
+    # is populated https://github.com/PyGithub/PyGithub/issues/1943
+    gh.get_rate_limit()
+
+    # Make sure we have the required privilege
+    required_privilege = 'admin:org'
+    if (gh.oauth_scopes is None
+            or required_privilege not in gh.oauth_scopes):
+        print("""
+ERROR: This script requires a Token with the '{}' scope.
+
+Please update the config.yml file and GitHub Token as appropriate
+https://github.com/settings/tokens
+"""
+              .format(required_privilege))
+        sys.exit(1)
+
     # Organization
     print("Retrieving organization '{0}'".format(config.ORG_PLUGINS))
     org = gh.get_organization(config.ORG_PLUGINS)
@@ -79,13 +96,7 @@ def main():
     try:
         teams = retrieve_teams(org)
     except GithubException as err:
-        print()
-        if err.status == 401:
-            print("This script requires authentication with a privileged "
-                  "account to access and update the organization's team.")
-            print("Please update the configuration as appropriate")
-        else:
-            print("Unknown error", err)
+        print("Unknown error", err)
         sys.exit(1)
     print(len(teams), "found", end=', ')
 

@@ -128,12 +128,13 @@ https://github.com/settings/tokens
     # Checking for "orphan" teams
     print("Checking for other, possibly orphan teams...")
     count = 0
-    for team in teams:
-        search = team.replace('Plugin ', '').lower()
+    for team_name, team in teams.items():
+        search = team_name.replace('Plugin ', '').lower()
         if search not in map(str.lower, org_repos):
-            print(' ', team)
+            print(' ', team_name)
+            print('  ', team.raw_data['html_url'])
             count += 1
-    print("  {0} Teams to check".format(count))
+    print("  {0} Teams must be checked manually".format(count))
 
     # Process Special teams and check that they grant access
     # to each of the org's repo; add appropriate access if not

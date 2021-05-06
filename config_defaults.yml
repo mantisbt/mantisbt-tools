@@ -14,10 +14,11 @@ github:
     # NOTE: Accessing the GitHub API with user/password is deprecated since
     # 2020-02-14 and will be removed on 2020-11-13.
     # https://developer.github.com/changes/2020-02-14-deprecating-password-auth/
-    user:         None
-    password:     None
+    user:         null
+    password:     null
 
     # Personal access token
+    # If null, connection to GitHub will be anonymous
     # Generate at https://github.com/settings/tokens
     # The token must have at least `public_repo` scope
-    token: None
+    token: null

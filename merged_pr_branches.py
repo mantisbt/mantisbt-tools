@@ -14,9 +14,7 @@ that can be used to delete the no-longer needed branches.
 """
 
 import getopt
-import os
 from os import path
-import subprocess
 import sys
 
 # Github module https://github.com/jacquev6/PyGithub
@@ -37,16 +35,20 @@ author = None
 short_options = "hr:t:"
 long_options = ["help", "author=", "repository=", "target="]
 
+# GitHub API object
+gh: Github
+
 
 def get_options():
-    '''
+    """
     Process command-line options.
     Option values are stored in global variables below.
-    '''
+    """
     global repo_name, target_org, author
 
     def usage():
-        print('''Identifies branches merged via pull request still present in a repository
+        print("""
+Identifies branches merged via pull request still present in a repository
 
 Usage: {0} [options] <author>
 
@@ -55,7 +57,7 @@ Options:
 
     -r | --repository <repo>  Repository name (default: {1})
     -t | --target <name>      GitHub ID of the target org/user (default: {2})
-'''
+"""
               .format(path.basename(__file__), repo_name, target_org))
     # end usage()
 
@@ -86,9 +88,9 @@ Options:
 
 
 def get_repo(user, repo):
-    '''
+    """
     Return a GitHub repository object
-    '''
+    """
     fullname = '{0}/{1}'.format(user, repo)
 
     try:
@@ -101,7 +103,7 @@ def get_repo(user, repo):
 
 
 def main():
-    opt = get_options()
+    get_options()
 
     print('Connecting to GitHub')
     global gh

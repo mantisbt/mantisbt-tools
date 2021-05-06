@@ -154,7 +154,7 @@ https://github.com/settings/tokens
                     access,
                     repo.name
                 ))
-                team.set_repo_permission(repo, access)
+                team.update_team_repository(repo, access)
         print("  {0} plugins processed".format(count))
 
 

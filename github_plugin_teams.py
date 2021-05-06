@@ -68,11 +68,11 @@ def retrieve_team_repos(team):
 
 def main():
     print("Connecting to Github")
-    g = Github(cfg.github['token'])
+    gh = Github(cfg.github['token'])
 
     # Organization
     print("Retrieving organization '{0}'".format(config.ORG_PLUGINS))
-    org = g.get_organization(config.ORG_PLUGINS)
+    org = gh.get_organization(config.ORG_PLUGINS)
 
     # Organization Teams
     print("Retrieving teams...", end=' ')

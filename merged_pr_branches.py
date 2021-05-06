@@ -18,7 +18,7 @@ from os import path
 import sys
 
 # Github module https://github.com/jacquev6/PyGithub
-from github import Github, GithubException
+from github import Github, GithubException, BadCredentialsException
 
 # MantisBT scripts config
 from config import cfg
@@ -95,7 +95,10 @@ def get_repo(user, repo):
 
     try:
         repo = gh.get_repo(fullname)
-    except GithubException as e:
+    except BadCredentialsException:
+        print("ERROR: invalid credentials - check token in config.yml")
+        sys.exit(1)
+    except GithubException:
         print("ERROR: repository '{}' not found".format(fullname))
         sys.exit(1)
 

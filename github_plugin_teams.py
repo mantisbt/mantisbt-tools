@@ -47,7 +47,7 @@ def retrieve_config_teams(org_teams):
     for team in cfg.github['teams']:
         try:
             config_teams[team] = org_teams[team]
-        except KeyError as err:
+        except KeyError:
             invalid.append(team)
     if invalid:
         print("Unknown teams specified in configuration:", ', '.join(invalid))
@@ -79,13 +79,13 @@ def main():
     try:
         teams = retrieve_teams(org)
     except GithubException as err:
-        print
+        print()
         if err.status == 401:
             print("This script requires authentication with a privileged "
                   "account to access and update the organization's team.")
             print("Please update the configuration as appropriate")
         else:
-            print("Unknown error", (err))
+            print("Unknown error", err)
         sys.exit(1)
     print(len(teams), "found", end=', ')
 
@@ -110,7 +110,7 @@ def main():
         team_name = 'Plugin ' + repo.name
         if not team_name.lower() in map(str.lower, teams):
             print("  Creating team for '{0}'".format(repo.name))
-            new_team = org.create_team(team_name, [repo], 'push', 'closed')
+            org.create_team(team_name, [repo], 'push', 'closed')
             count += 1
     print("  {0} plugin teams created".format(count))
 
@@ -119,7 +119,7 @@ def main():
     count = 0
     for team in teams:
         search = team.replace('Plugin ', '').lower()
-        if not search in map(str.lower, org_repos):
+        if search not in map(str.lower, org_repos):
             print(' ', team)
             count += 1
     print("  {0} Teams to check".format(count))
@@ -142,7 +142,7 @@ def main():
                 print("  Grant {0} access to plugin '{1}'".format(
                     access,
                     repo.name
-                    ))
+                ))
                 team.set_repo_permission(repo, access)
         print("  {0} plugins processed".format(count))
 

@@ -150,7 +150,7 @@ then
 else
 	refList=origin/$branches
 fi
-$pathTools/buildrelease-repo.py --auto-suffix --ref "${refList// /,}" --fresh --docbook $pathBuilds 2>&1 |tee -a "$logfile"
+$pathTools/buildrelease-repo.py --auto-suffix --ref "${refList// /,}" --fresh $pathBuilds 2>&1 |tee -a "$logfile"
 echo >>"$logfile"
 
 

@@ -10,7 +10,7 @@
 # Github settings
 #
 github:
-    # Personal access token
+    # Personal access token 
     # If null, connection to GitHub will be anonymous
     # Generate at https://github.com/settings/tokens
     # The token must have at least `public_repo` scope

@@ -5,7 +5,7 @@ Configuration for various MantisBT utility scripts
 
 from pathlib import Path
 import yaml
-import collections
+import collections 
 
 
 # Constants

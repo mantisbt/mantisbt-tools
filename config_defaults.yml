@@ -13,7 +13,8 @@ github:
     # Personal access token
     # If null, connection to GitHub will be anonymous
     # Generate at https://github.com/settings/tokens
-    # The token must have at least `public_repo` scope
+    # The token must have at least `public_repo` scope. Additionally,
+    # - `write:org` is required to run github_plugin_teams.py
     token: null
 
     # Global teams in mantisbt-plugins org that should have access to

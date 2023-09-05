@@ -75,16 +75,20 @@ def main():
     gh.get_rate_limit()
 
     # Make sure we have the required privilege
-    required_privilege = 'admin:org'
-    if (gh.oauth_scopes is None
-            or required_privilege not in gh.oauth_scopes):
+    required_privileges = ['write:org', 'admin:org']
+    has_required_privilege = False
+    if gh.oauth_scopes is not None:
+        for privilege in required_privileges:
+            if privilege in gh.oauth_scopes:
+                has_required_privilege = True
+                break
+    if not has_required_privilege:
         print("""
-ERROR: This script requires a Token with the '{}' scope.
+ERROR: This script requires a Token with the 'write:org' scope.
 
 Please update the config.yml file and GitHub Token as appropriate
 https://github.com/settings/tokens
-"""
-              .format(required_privilege))
+""")
         sys.exit(1)
 
     # Organization

@@ -133,6 +133,11 @@ https://github.com/settings/tokens
     print("Checking for other, possibly orphan teams...")
     count = 0
     for team_name, team in teams.items():
+        # Ignore special teams granting access to multiple plugins
+        if team_name.startswith('Plugins '):
+            print("  Ignoring '{}'".format(team_name))
+            continue
+
         search = team_name.replace('Plugin ', '').lower()
         if search not in map(str.lower, org_repos):
             print(' ', team_name)

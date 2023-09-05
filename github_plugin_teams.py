@@ -84,7 +84,7 @@ def main():
                 break
     if not has_required_privilege:
         print("""
-ERROR: This script requires a Token with the 'write:org' scope.
+ERROR: This script requires a Classic Token with the 'write:org' scope.
 
 Please update the config.yml file and GitHub Token as appropriate
 https://github.com/settings/tokens

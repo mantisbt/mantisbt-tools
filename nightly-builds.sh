@@ -137,7 +137,7 @@ log "Branches found: $expanded_branches"
 log "Deleting old builds not part of branches list"
 find $pathBuilds -maxdepth 1 -name 'mantisbt*' |
 	grep -vE -- "-(${expanded_branches//,/|})-[0-9a-f]{7}\" |
-	xargs --no-run-if-empty rm -r 2>&1 |tee -a "$logfile"
+	xargs --no-run-if-empty rm -rv 2>&1 |tee -a "$logfile"
 
 # Build the tarballs
 log "Generating nightly builds for branches: $expanded_branches"
@@ -163,7 +163,7 @@ do
 		fileSpec=$(basename "$build" $keyExt)
 		echo "    Deleting files for $fileSpec"
 		# shellcheck disable=SC2086
-		rm -r $fileSpec*
+		rm -rv $fileSpec* >> "$logfile"
 	done
 done |tee -a "$logfile"
 echo >>"$logfile"

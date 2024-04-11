@@ -56,9 +56,9 @@ PHPENV_phpVersion=
 
 function log()
 {
-    DATE=$(date +"%F %T")
-    echo "$@"
-    echo "$DATE  $*" >>"$logfile"
+	DATE=$(date +"%F %T")
+	echo "$@"
+	echo "$DATE  $*" >>"$logfile"
 }
 
 function err()

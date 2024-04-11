@@ -135,15 +135,15 @@ log "Branches found: $expanded_branches"
 
 # Remove any builds not part of the branches list
 log "Deleting old builds not part of branches list"
-find $pathBuilds -maxdepth 1 -name 'mantisbt*' |
-	grep -vE -- "-(${expanded_branches//,/|})-[0-9a-f]{7}\" |
-	xargs --no-run-if-empty rm -rv 2>&1 |tee -a "$logfile"
+find $pathBuilds -maxdepth 1 -name 'mantisbt*' -regextype egrep \
+	! -regex ".*-(${expanded_branches//,/|})-[0-9a-f]{7,}\..*" -print0 |
+	xargs -0 --no-run-if-empty rm -rv 2>&1 |tee -a "$logfile"
 
 # Build the tarballs
 log "Generating nightly builds for branches: $expanded_branches"
 # Prefixing each branch name with remote
 refList=$(eval echo "$remote/{$expanded_branches}")
-$pathTools/buildrelease-repo.py --auto-suffix --ref "${refList// /,}" --fresh --clean $pathBuilds 2>&1 |tee -a "$logfile"
+echo $pathTools/buildrelease-repo.py --auto-suffix --ref "${refList// /,}" --fresh --clean $pathBuilds 2>&1 |tee -a "$logfile"
 echo >>"$logfile"
 
 

@@ -17,7 +17,7 @@
 # Space-delimited list of branches to process
 # If blank, all branches present in the specified remote will be processed
 # Use '*' as wildcard to match branch names, e.g. "master *2.*"
-branches="master*"
+branches="master master-2*"
 
 # Path to reference MantisBT repository and name of remote to use
 # This is used to build the actual branches list from the above specification

@@ -14,14 +14,15 @@
 # Parameters (edit variables as appropriate)
 #
 
-# Comma-delimited list of branches to process
-# If blank, all branches present in the 'origin' remote will be processed
-# Use '*' as wildcard to match branch names, e.g. master*, *1.3*
+# Space-delimited list of branches to process
+# If blank, all branches present in the specified remote will be processed
+# Use '*' as wildcard to match branch names, e.g. "master *2.*"
 branches="master*"
 
-# Path to reference MantisBT repository
-# This is used to build the branches list when not specified
+# Path to reference MantisBT repository and name of remote to use
+# This is used to build the actual branches list from the above specification
 pathRepo=/srv/mantisbt
+remote=origin
 
 # Where to save the builds
 pathBuilds=/srv/www/builds
@@ -58,6 +59,12 @@ function log()
     DATE=$(date +"%F %T")
     echo "$@"
     echo "$DATE  $*" >>"$logfile"
+}
+
+function err()
+{
+	log "$*"
+	exit 1
 }
 
 
@@ -102,54 +109,40 @@ then
 	fi
 fi
 
-# No branches or wildcard specified, get the list from the reference repo
-if [[ -z "$branches" || "$branches" =~ \* ]]
+# Get the list of branches to build from the reference repo
+if [[ "$branches" == '*' ]]
 then
-	log "Retrieving branches from MantisBT repo in $pathRepo"
-
-	if ! cd $pathRepo
-	then
-		echo "ERROR: invalid directory $pathRepo" >>"$logfile"
-		exit 1
-	fi
-
-	tempfile=$(mktemp)
-	# Make sure the origin remote exists
-	if git remote show origin -n 2>"$tempfile" >/dev/null
-	then
-		if [[ "$branches" =~ ',' ]]
-		then
-			# Branches list contains multiple entries
-			refList=$(eval echo "refs/heads/{$branches}")
-		elif [[ -n "$branches" ]]
-		then
-			refList="refs/heads/$branches"
-		else
-			refList=""
-		fi
-		branches=$(git ls-remote --heads origin "$refList" | cut -d/ -f3- | paste -d, --serial)
-	else
-		cat "$tempfile" |tee -a "$logfile"
-	fi
-	rm "$tempfile"
-	[[ -z "$branches" ]] && exit 1
+	branches=""
 fi
+# Disable globbing to ensure we display the '*' when $branches is empty
+set -f
+log "Retrieving branches matching '${branches:-*}'"
+set +f
+
+log "Switching to MantisBT repo in '$pathRepo'"
+cd "$pathRepo" 2>>"$logfile" || err "ERROR: invalid repo directory '$pathRepo'"
+
+set -o pipefail
+# shellcheck disable=SC2086
+expanded_branches=$(git ls-remote --heads $remote $branches | cut -d/ -f3- | paste -d, --serial)
+[[ $? == 128 ]] &&
+	err "ERROR: remote $remote not found"
+set +o pipefail
+[[ -z $expanded_branches ]] &&
+	err "ERROR: no branches matching '$branches' found in repo"
+log "Branches found: $expanded_branches"
+
 
 # Remove any builds not part of the branches list
 log "Deleting old builds not part of branches list"
 find $pathBuilds -maxdepth 1 -name 'mantisbt*' |
-	grep -vE -- "-(${branches//,/|})-[0-9a-f]{7}" |
+	grep -vE -- "-(${expanded_branches//,/|})-[0-9a-f]{7}\" |
 	xargs --no-run-if-empty rm -r 2>&1 |tee -a "$logfile"
 
 # Build the tarballs
-log "Generating nightly builds for branches: $branches"
-refList=$(eval echo "origin/{$branches}")
-if [[ $branches == *,* ]]
-then
-	refList=$(eval echo "origin/{$branches}")
-else
-	refList=origin/$branches
-fi
+log "Generating nightly builds for branches: $expanded_branches"
+# Prefixing each branch name with remote
+refList=$(eval echo "$remote/{$expanded_branches}")
 $pathTools/buildrelease-repo.py --auto-suffix --ref "${refList// /,}" --fresh --clean $pathBuilds 2>&1 |tee -a "$logfile"
 echo >>"$logfile"
 
@@ -158,7 +151,7 @@ echo >>"$logfile"
 echo "Keeping only the most recent $numToKeep builds" |tee -a "$logfile"
 # shellcheck disable=SC2164
 cd $pathBuilds
-for branch in ${branches//,/ }
+for branch in ${expanded_branches//,/ }
 do
 	echo "  Processing '$branch' branch"
 	# List files by date, grep for branch with shortened MD5 pattern and key

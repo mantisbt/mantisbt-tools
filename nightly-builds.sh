@@ -143,7 +143,7 @@ find $pathBuilds -maxdepth 1 -name 'mantisbt*' -regextype egrep \
 log "Generating nightly builds for branches: $expanded_branches"
 # Prefixing each branch name with remote
 refList=$(eval echo "$remote/{$expanded_branches}")
-echo $pathTools/buildrelease-repo.py --auto-suffix --ref "${refList// /,}" --fresh --clean $pathBuilds 2>&1 |tee -a "$logfile"
+$pathTools/buildrelease-repo.py --auto-suffix --ref "${refList// /,}" --fresh --clean $pathBuilds 2>&1 |tee -a "$logfile"
 echo >>"$logfile"
 
 

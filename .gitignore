@@ -2,6 +2,8 @@
 config.yml
 
 # Python
+/venv/
+/__pycache__/
 *.pyc
 
 # Editors

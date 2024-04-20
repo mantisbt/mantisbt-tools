@@ -14,7 +14,7 @@ github:
     # If null, connection to GitHub will be anonymous
     # Generate at https://github.com/settings/tokens
     # The token must have at least `public_repo` scope. Additionally,
-    # - `write:org` is required to run github_plugin_teams.py
+    # - `admin:org` is required to run github_plugin_teams.py
     # Note: Fine-grained tokens are currently not supported
     token: null
 

@@ -75,7 +75,7 @@ def main():
     gh.get_rate_limit()
 
     # Make sure we have the required privilege
-    required_privileges = ['write:org', 'admin:org']
+    required_privileges = ['admin:org']
     has_required_privilege = False
     if gh.oauth_scopes is not None:
         for privilege in required_privileges:
@@ -84,7 +84,7 @@ def main():
                 break
     if not has_required_privilege:
         print("""
-ERROR: This script requires a Classic Token with the 'write:org' scope.
+ERROR: This script requires a Classic Token with the 'admin:org' scope.
 
 Please update the config.yml file and GitHub Token as appropriate
 https://github.com/settings/tokens

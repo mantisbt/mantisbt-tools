@@ -2,10 +2,9 @@
 """
 Configuration for various MantisBT utility scripts
 """
-
+from collections.abc import Mapping
 from pathlib import Path
 import yaml
-import collections
 
 
 # Constants
@@ -28,8 +27,8 @@ def __update(base, upd):
     """
     Recursively update 'base' dict with corresponding values in 'upd'
     """
-    if (isinstance(base, collections.Mapping) and
-            isinstance(upd, collections.Mapping)):
+    if (isinstance(base, Mapping) and
+            isinstance(upd, Mapping)):
         for key, value in upd.items():
             base[key] = __update(base.get(key, {}), value)
     elif upd is not None:

@@ -5,19 +5,39 @@
  * This helper program generates a SQL script to help recovering individual
  * issues from a database backup, e.g. after accidental deletion.
  *
- * The overall process is as follows:
- * 1. Restore the backup into a new database
- * 2. Identify the ID(s) of the issue(s) to recover
- * 3. Generate the recovery script
- *    - Setup a temporary MantisBT code base in a directory of your choice
+ * Usage instructions:
+ *
+ * 1. Restore the backup into a new, temporary database
+ *
+ * 2. Identify the ID(s) of the issue(s) to recover, e.g.
+ *    ```sql
+ *    SELECT b1.id
+ *    FROM production.mantis_bug_table b1
+ *    LEFT JOIN backup.mantis_bug_table b2 ON b2.id = b1.id
+ *    WHERE b1.id IS NULL;
+ *    ```
+ *
+ * 3. Set up a temporary MantisBT instance
+ *    - Copy of the production MantisBT instance's directory to the location
+ *      of your choice,
  *    - Update config_inc.php to point to the DB restored in 1.
- *    - Populate the $t_bug_list variable below with the list of issue IDs
- *      identified in 2.
- *    - Save the modified script at root of temp MantisBT dir
- *    - Run the script
- * 4. Review the generated SQL script
- * 5. Backup the target database as needed
- * 5. Manually execute the script in the target database
+ *
+ * 4. Generate the recovery script
+ *    - Copy this program to the root of the temporary MantisBT instance,
+ *    - Populate the $g_bug_list variable below with the list of issue IDs
+ *      identified in step 2,
+ *    - if necessary, update $g_filename to set the path to where the script
+ *      should be saved (by default, `restore.sql` in the current directory),
+ *    - Save the modified program,
+ *    - Run it from CLI (`php restore_issue.php`).
+ *
+ * 4. Review the generated SQL script.
+ *
+ * 5. Backup the target database.
+ *
+ * 5. Manually execute the script in the production database.
+ *
+ * 6. Delete the temporary MantisBT instance and drop the restored database.
  */
 
 /**

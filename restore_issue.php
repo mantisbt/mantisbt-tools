@@ -69,6 +69,7 @@ $t_tables = array(
 	'bug_tag'             => 'bug_id',
 	'custom_field_string' => 'bug_id',
 );
+$t_has_attachments = false;
 
 $t_file = fopen( $g_filename, 'w' );
 fwrite( $t_file, "-- MantisBT Issue Restore script" . PHP_EOL );
@@ -105,6 +106,10 @@ foreach( $t_tables as $t_table => $t_field ) {
 		continue;
 	}
 
+	if( $t_table == 'bug_file' ) {
+		$t_has_attachments = true;
+	};
+
 	# Generate Insert statement SQL
 	fwrite( $t_file,
 		'INSERT INTO ' . db_get_table( $t_table )
@@ -119,6 +124,10 @@ foreach( $t_tables as $t_table => $t_field ) {
 fclose( $t_file );
 
 echo "Restore script saved in: $g_filename\n";
+
+if( $t_has_attachments ) {
+	echo "WARNING: Issues with attachments - restore these to the file system manually\n";
+}
 
 
 /**

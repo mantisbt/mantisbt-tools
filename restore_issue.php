@@ -37,7 +37,7 @@ echo "Generating restore script...\n";
 
 if( !$g_bug_list ) {
 	echo "Update the '\$g_bug_list' array with the issues to restore\n";
-	exit(1);
+	exit( 1 );
 }
 echo "Issues to restore: " . implode( ', ', $g_bug_list ) . "\n";
 
@@ -52,7 +52,7 @@ if( file_exists( $g_filename ) ) {
 global $g_bypass_headers;
 $g_bypass_headers = 1;
 
-include( 'core.php' );
+include 'core.php';
 
 # List of tables to restore with corresponding key field for bug id
 $t_tables = array(
@@ -128,9 +128,9 @@ echo "Restore script saved in: $g_filename\n";
  */
 function where_clause( $p_field ) {
 	static $s_where;
-	if(!$s_where) {
+	if( !$s_where ) {
 		global $g_bug_list;
-		$s_where = ' IN (' . implode( ',', $g_bug_list ). ')';
+		$s_where = ' IN (' . implode( ',', $g_bug_list ) . ')';
 	}
 	return $p_field . $s_where;
 }

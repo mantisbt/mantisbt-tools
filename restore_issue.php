@@ -42,6 +42,7 @@ if( !$g_bug_list ) {
 echo "Issues to restore: " . implode( ', ', $g_bug_list ) . "\n";
 
 if( file_exists( $g_filename ) ) {
+	/** @noinspection PhpComposerExtensionStubsInspection */
 	$t_reply = readline( "File '$g_filename' already exists. Overwrite ? " );
 	if( strtolower( $t_reply[0] ?? '' ) !== 'y' ) {
 		echo "Aborting." . PHP_EOL;
@@ -108,7 +109,7 @@ foreach( $t_tables as $t_table => $t_field ) {
 
 	if( $t_table == 'bug_file' ) {
 		$t_has_attachments = true;
-	};
+	}
 
 	# Generate Insert statement SQL
 	fwrite( $t_file,
@@ -117,7 +118,7 @@ foreach( $t_tables as $t_table => $t_field ) {
 	);
 	while( $t_row = db_fetch_array( $t_result ) ) {
 		fwrite( $t_file, ',' . PHP_EOL . insert_values( $t_row ) );
-	};
+	}
 	fwrite( $t_file, ';' . PHP_EOL . PHP_EOL );
 }
 
@@ -135,7 +136,8 @@ if( $t_has_attachments ) {
  * @param string $p_field Field name for Bug ID
  * @return string SQL where clause
  */
-function where_clause( $p_field ) {
+function where_clause( string $p_field ): string
+{
 	static $s_where;
 	if( !$s_where ) {
 		global $g_bug_list;
@@ -149,7 +151,8 @@ function where_clause( $p_field ) {
  * @param array $p_row Data row
  * @return string Escaped list of values
  */
-function insert_values( $p_row ) {
+function insert_values( array $p_row ): string
+{
 	array_walk( $p_row,
 		function( &$p_str ) {
 			global $g_db;
@@ -160,5 +163,4 @@ function insert_values( $p_row ) {
 		}
 	);
 	return '(' . implode( ',', $p_row ) . ')';
-
 }

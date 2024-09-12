@@ -33,10 +33,13 @@ $g_filename = 'restore.sql';
 # No edit below this line
 #
 
+echo "Generating restore script...\n";
+
 if( !$g_bug_list ) {
 	echo "Update the '\$g_bug_list' array with the issues to restore\n";
 	exit(1);
 }
+echo "Issues to restore: " . implode( ', ', $g_bug_list ) . "\n";
 
 if( file_exists( $g_filename ) ) {
 	$t_reply = readline( "File '$g_filename' already exists. Overwrite ? " );

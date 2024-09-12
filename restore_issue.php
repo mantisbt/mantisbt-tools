@@ -1,5 +1,7 @@
 <?php
 /**
+ * Generate SQL script to restore deleted Issues from a database backup.
+ *
  * This helper program generates a SQL script to help recovering individual
  * issues from a database backup, e.g. after accidental deletion.
  *
@@ -18,7 +20,9 @@
  * 5. Manually execute the script in the target database
  */
 
-# List of issue IDs to recover
+/**
+ * @global int[] $g_bug_list List of Issues to restore
+ */
 $g_bug_list = array(
 
 );
@@ -133,7 +137,9 @@ if( $t_has_attachments ) {
 
 /**
  * Generate where clause to select issue IDs.
+ *
  * @param string $p_field Field name for Bug ID
+ *
  * @return string SQL where clause
  */
 function where_clause( string $p_field ): string
@@ -148,7 +154,9 @@ function where_clause( string $p_field ): string
 
 /**
  * Returns row data ready for use in insert statement values.
+ *
  * @param array $p_row Data row
+ *
  * @return string Escaped list of values
  */
 function insert_values( array $p_row ): string

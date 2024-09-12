@@ -114,7 +114,13 @@ function where_clause( $p_field ) {
  */
 function insert_values( $p_row ) {
 	array_walk( $p_row,
-		function ( &$p_str ) { $p_str = "'" . db_prepare_string( $p_str ) . "'"; }
+		function( &$p_str ) {
+			global $g_db;
+			if( !is_numeric( $p_str ) ) {
+				$p_str = $g_db->qStr( $p_str );
+			}
+			echo $p_str, "\n";
+		}
 	);
 	return '(' . implode( ',', $p_row ) . ')';
 

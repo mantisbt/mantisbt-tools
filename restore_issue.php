@@ -37,6 +37,8 @@
  *
  * 5. Manually execute the script in the production database.
  *
+ * 6. Restore any file attachments from backup using the tarsnap command
+ *
  * 6. Delete the temporary MantisBT instance and drop the restored database.
  */
 
@@ -94,7 +96,7 @@ $t_tables = array(
 	'bug_tag'             => 'bug_id',
 	'custom_field_string' => 'bug_id',
 );
-$t_has_attachments = false;
+$t_attachments = [];
 
 $t_file = fopen( $g_filename, 'w' );
 fwrite( $t_file, "-- MantisBT Issue Restore script" . PHP_EOL );
@@ -131,17 +133,23 @@ foreach( $t_tables as $t_table => $t_field ) {
 		continue;
 	}
 
-	if( $t_table == 'bug_file' ) {
-		$t_has_attachments = true;
-	}
-
 	# Generate Insert statement SQL
-	fwrite( $t_file,
-		'INSERT INTO ' . db_get_table( $t_table )
-		. ' VALUES ' . PHP_EOL . insert_values( $t_row )
-	);
-	while( $t_row = db_fetch_array( $t_result ) ) {
-		fwrite( $t_file, ',' . PHP_EOL . insert_values( $t_row ) );
+	fwrite( $t_file, 'INSERT INTO ' . db_get_table( $t_table ) . ' VALUES ' );
+	while( true ) {
+		fwrite( $t_file, PHP_EOL . insert_values( $t_row ) );
+
+		# Keep track of attachments
+		if( $t_table == 'bug_file' ) {
+			$t_attachments[$t_row['id']] = $t_row;
+		}
+
+		# Get next row
+		$t_row = db_fetch_array( $t_result );
+		if( !$t_row ) {
+			break;
+		}
+
+		fwrite( $t_file, ',' );
 	}
 	fwrite( $t_file, ';' . PHP_EOL . PHP_EOL );
 }
@@ -150,8 +158,19 @@ fclose( $t_file );
 
 echo "Restore script saved in: $g_filename\n";
 
-if( $t_has_attachments ) {
+# List attachments and sample Tarsnap command to restore them
+if( $t_attachments ) {
 	echo "WARNING: Issues with attachments - restore these to the file system manually\n";
+	$t_tarsnap = "tarsnap -x -f mantisbt_org_XXXX -C /tmp ";
+	foreach( $t_attachments as $t_attachment ) {
+		extract( $t_attachment, EXTR_PREFIX_ALL, 'v' );
+		$t_filename = str_replace( '/var/', '/srv/', $v_folder ) . $v_diskfile;
+		$t_tarsnap .= ltrim( $t_filename, '/' ) . ' ';
+		echo "- id: $v_id for bug $v_bug_id: $t_filename ($v_filename)\n";
+	}
+	echo "WARNING: Directory may be incorrect\n";
+	echo "Sample Tarsnap restore command, adjust as appropriate\n";
+	echo $t_tarsnap . PHP_EOL;
 }
 
 

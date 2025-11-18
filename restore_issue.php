@@ -154,6 +154,12 @@ foreach( $t_tables as $t_table => $t_field ) {
 	fwrite( $t_file, ';' . PHP_EOL . PHP_EOL );
 }
 
+# Bump the restored Issues' last_updated date to more easily identify them
+# from MantisBT UI in case post processing is needed
+fwrite( $t_file, "-- Bumping restored Issues' last updated date \n" );
+fwrite( $t_file, "UPDATE mantis_bug_table SET last_updated = UNIX_TIMESTAMP() "
+	. 'WHERE ' . where_clause( 'id' ) . ";\n" );
+
 fclose( $t_file );
 
 echo "Restore script saved in: $g_filename\n";

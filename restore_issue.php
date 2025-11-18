@@ -59,6 +59,11 @@ $g_filename = 'restore.sql';
 # No edit below this line
 #
 
+global $g_bypass_headers;
+$g_bypass_headers = 1;
+
+include 'core.php';
+
 echo "Generating restore script...\n";
 
 if( !$g_bug_list ) {
@@ -75,11 +80,6 @@ if( file_exists( $g_filename ) ) {
 		exit( 1 );
 	}
 }
-
-global $g_bypass_headers;
-$g_bypass_headers = 1;
-
-include 'core.php';
 
 # List of tables to restore with corresponding key field for bug id
 $t_tables = array(

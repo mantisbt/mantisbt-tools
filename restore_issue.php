@@ -67,8 +67,8 @@ echo "Issues to restore: " . implode( ', ', $g_bug_list ) . "\n";
 
 if( file_exists( $g_filename ) ) {
 	/** @noinspection PhpComposerExtensionStubsInspection */
-	$t_reply = readline( "File '$g_filename' already exists. Overwrite ? " );
-	if( strtolower( $t_reply[0] ?? '' ) !== 'y' ) {
+	$t_reply = readline( "File '$g_filename' already exists. Overwrite [y] ? " );
+	if( strtolower( $t_reply[0] ?? 'y' ) !== 'y' ) {
 		echo "Aborting." . PHP_EOL;
 		exit( 1 );
 	}

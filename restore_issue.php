@@ -54,6 +54,21 @@ $g_bug_list = array(
  */
 $g_filename = 'restore.sql';
 
+/**
+ * Text for a bugnote to add to each restored bug.
+ *
+ * Set to empty string to skip adding bugnote.
+ * If not empty, {@see $g_username} must be set.
+ *
+ * @global string $g_bugnote_message
+ */
+$g_bugnote_message = 'Issue restored from backup following accidental deletion.';
+
+/**
+ * @global string $g_username Author of the "Issue restored" bugnote.
+ */
+$g_username = '';
+
 
 # ----------------------------------------------------------------------------
 # No edit below this line
@@ -65,6 +80,13 @@ $g_bypass_headers = 1;
 include 'core.php';
 
 echo "Generating restore script...\n";
+
+/** @noinspection PhpUnhandledExceptionInspection */
+$t_user_id = user_get_id_by_name( $g_username );
+if( $g_bugnote_message && ( !$g_username || !$t_user_id ) ) {
+	echo "Set the '\$g_username' variable to a valid username\n";
+	exit( 1 );
+}
 
 if( !$g_bug_list ) {
 	echo "Update the '\$g_bug_list' array with the issues to restore\n";
@@ -152,6 +174,30 @@ foreach( $t_tables as $t_table => $t_field ) {
 		fwrite( $t_file, ',' );
 	}
 	fwrite( $t_file, ';' . PHP_EOL . PHP_EOL );
+}
+
+# Insert a bugnote in each restored Issue to indicate it was restored
+if( $g_bugnote_message ) {
+	$C = 'constant';
+	$t_ts = 'UNIX_TIMESTAMP()';
+	fwrite( $t_file, "-- Inserting 'Issue Restored' notes \n" );
+	foreach( $g_bug_list as $t_bug_id ) {
+		fwrite( $t_file, 'INSERT INTO ' . db_get_table( 'bugnote_text' )
+			. " (note) VALUES ('$g_bugnote_message');"
+			. PHP_EOL
+		);
+		fwrite( $t_file, 'INSERT INTO ' . db_get_table( 'bugnote' )
+			. "\n    (bug_id, reporter_id, bugnote_text_id, view_state, date_submitted, last_modified)"
+			. "\n    VALUES ($t_bug_id, $t_user_id, LAST_INSERT_ID(), {$C('VS_PUBLIC')}, $t_ts, $t_ts );"
+			. PHP_EOL
+		);
+		fwrite( $t_file, 'INSERT INTO ' . db_get_table( 'bug_history' )
+			. "\n    (user_id, bug_id, date_modified, type, old_value, new_value, field_name)"
+			. "\n    VALUES ($t_user_id, $t_bug_id, $t_ts, {$C('BUGNOTE_ADDED')}, LAST_INSERT_ID(), '', '');"
+			. PHP_EOL
+		);
+		fwrite( $t_file, PHP_EOL );
+	}
 }
 
 # Bump the restored Issues' last_updated date to more easily identify them

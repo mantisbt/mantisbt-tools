@@ -37,6 +37,8 @@
  *
  * 5. Manually execute the script in the production database.
  *
+ * 6. Restore any file attachments from backup using the tarsnap command
+ *
  * 6. Delete the temporary MantisBT instance and drop the restored database.
  */
 
@@ -52,12 +54,39 @@ $g_bug_list = array(
  */
 $g_filename = 'restore.sql';
 
+/**
+ * Text for a bugnote to add to each restored bug.
+ *
+ * Set to empty string to skip adding bugnote.
+ * If not empty, {@see $g_username} must be set.
+ *
+ * @global string $g_bugnote_message
+ */
+$g_bugnote_message = 'Issue restored from backup following accidental deletion.';
+
+/**
+ * @global string $g_username Author of the "Issue restored" bugnote.
+ */
+$g_username = '';
+
 
 # ----------------------------------------------------------------------------
 # No edit below this line
 #
 
+global $g_bypass_headers;
+$g_bypass_headers = 1;
+
+include 'core.php';
+
 echo "Generating restore script...\n";
+
+/** @noinspection PhpUnhandledExceptionInspection */
+$t_user_id = user_get_id_by_name( $g_username );
+if( $g_bugnote_message && ( !$g_username || !$t_user_id ) ) {
+	echo "Set the '\$g_username' variable to a valid username\n";
+	exit( 1 );
+}
 
 if( !$g_bug_list ) {
 	echo "Update the '\$g_bug_list' array with the issues to restore\n";
@@ -67,17 +96,12 @@ echo "Issues to restore: " . implode( ', ', $g_bug_list ) . "\n";
 
 if( file_exists( $g_filename ) ) {
 	/** @noinspection PhpComposerExtensionStubsInspection */
-	$t_reply = readline( "File '$g_filename' already exists. Overwrite ? " );
-	if( strtolower( $t_reply[0] ?? '' ) !== 'y' ) {
+	$t_reply = readline( "File '$g_filename' already exists. Overwrite [y] ? " );
+	if( strtolower( $t_reply[0] ?? 'y' ) !== 'y' ) {
 		echo "Aborting." . PHP_EOL;
 		exit( 1 );
 	}
 }
-
-global $g_bypass_headers;
-$g_bypass_headers = 1;
-
-include 'core.php';
 
 # List of tables to restore with corresponding key field for bug id
 $t_tables = array(
@@ -94,7 +118,7 @@ $t_tables = array(
 	'bug_tag'             => 'bug_id',
 	'custom_field_string' => 'bug_id',
 );
-$t_has_attachments = false;
+$t_attachments = [];
 
 $t_file = fopen( $g_filename, 'w' );
 fwrite( $t_file, "-- MantisBT Issue Restore script" . PHP_EOL );
@@ -131,27 +155,74 @@ foreach( $t_tables as $t_table => $t_field ) {
 		continue;
 	}
 
-	if( $t_table == 'bug_file' ) {
-		$t_has_attachments = true;
-	}
-
 	# Generate Insert statement SQL
-	fwrite( $t_file,
-		'INSERT INTO ' . db_get_table( $t_table )
-		. ' VALUES ' . PHP_EOL . insert_values( $t_row )
-	);
-	while( $t_row = db_fetch_array( $t_result ) ) {
-		fwrite( $t_file, ',' . PHP_EOL . insert_values( $t_row ) );
+	fwrite( $t_file, 'INSERT INTO ' . db_get_table( $t_table ) . ' VALUES ' );
+	while( true ) {
+		fwrite( $t_file, PHP_EOL . insert_values( $t_row ) );
+
+		# Keep track of attachments
+		if( $t_table == 'bug_file' ) {
+			$t_attachments[$t_row['id']] = $t_row;
+		}
+
+		# Get next row
+		$t_row = db_fetch_array( $t_result );
+		if( !$t_row ) {
+			break;
+		}
+
+		fwrite( $t_file, ',' );
 	}
 	fwrite( $t_file, ';' . PHP_EOL . PHP_EOL );
 }
+
+# Insert a bugnote in each restored Issue to indicate it was restored
+if( $g_bugnote_message ) {
+	$C = 'constant';
+	$t_ts = 'UNIX_TIMESTAMP()';
+	fwrite( $t_file, "-- Inserting 'Issue Restored' notes \n" );
+	foreach( $g_bug_list as $t_bug_id ) {
+		fwrite( $t_file, 'INSERT INTO ' . db_get_table( 'bugnote_text' )
+			. " (note) VALUES ('$g_bugnote_message');"
+			. PHP_EOL
+		);
+		fwrite( $t_file, 'INSERT INTO ' . db_get_table( 'bugnote' )
+			. "\n    (bug_id, reporter_id, bugnote_text_id, view_state, date_submitted, last_modified)"
+			. "\n    VALUES ($t_bug_id, $t_user_id, LAST_INSERT_ID(), {$C('VS_PUBLIC')}, $t_ts, $t_ts );"
+			. PHP_EOL
+		);
+		fwrite( $t_file, 'INSERT INTO ' . db_get_table( 'bug_history' )
+			. "\n    (user_id, bug_id, date_modified, type, old_value, new_value, field_name)"
+			. "\n    VALUES ($t_user_id, $t_bug_id, $t_ts, {$C('BUGNOTE_ADDED')}, LAST_INSERT_ID(), '', '');"
+			. PHP_EOL
+		);
+		fwrite( $t_file, PHP_EOL );
+	}
+}
+
+# Bump the restored Issues' last_updated date to more easily identify them
+# from MantisBT UI in case post processing is needed
+fwrite( $t_file, "-- Bumping restored Issues' last updated date \n" );
+fwrite( $t_file, "UPDATE mantis_bug_table SET last_updated = UNIX_TIMESTAMP() "
+	. 'WHERE ' . where_clause( 'id' ) . ";\n" );
 
 fclose( $t_file );
 
 echo "Restore script saved in: $g_filename\n";
 
-if( $t_has_attachments ) {
+# List attachments and sample Tarsnap command to restore them
+if( $t_attachments ) {
 	echo "WARNING: Issues with attachments - restore these to the file system manually\n";
+	$t_tarsnap = "tarsnap -x -f mantisbt_org_XXXX -C /tmp ";
+	foreach( $t_attachments as $t_attachment ) {
+		extract( $t_attachment, EXTR_PREFIX_ALL, 'v' );
+		$t_filename = str_replace( '/var/', '/srv/', $v_folder ) . $v_diskfile;
+		$t_tarsnap .= ltrim( $t_filename, '/' ) . ' ';
+		echo "- id: $v_id for bug $v_bug_id: $t_filename ($v_filename)\n";
+	}
+	echo "WARNING: Directory may be incorrect\n";
+	echo "Sample Tarsnap restore command, adjust as appropriate\n";
+	echo $t_tarsnap . PHP_EOL;
 }
 
 
@@ -187,7 +258,6 @@ function insert_values( array $p_row ): string
 			if( !is_numeric( $p_str ) ) {
 				$p_str = $g_db->qStr( $p_str );
 			}
-			echo $p_str, "\n";
 		}
 	);
 	return '(' . implode( ',', $p_row ) . ')';

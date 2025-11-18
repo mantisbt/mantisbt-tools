@@ -187,7 +187,6 @@ function insert_values( array $p_row ): string
 			if( !is_numeric( $p_str ) ) {
 				$p_str = $g_db->qStr( $p_str );
 			}
-			echo $p_str, "\n";
 		}
 	);
 	return '(' . implode( ',', $p_row ) . ')';

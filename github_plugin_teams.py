@@ -11,7 +11,7 @@ Uses Github API to
 import sys
 
 # PyGithub library https://github.com/PyGithub/PyGithub
-from github import Github, GithubException
+from github import Github, Auth, GithubException
 
 # Configuration variables
 import config
@@ -68,7 +68,8 @@ def retrieve_team_repos(team):
 
 def main():
     print("Connecting to Github")
-    gh = Github(cfg.github['token'])
+    token = Auth.Token(cfg.github['token'])
+    gh = Github(auth=token)
 
     # For some reason, we need some dummy API call to ensure oauth_scopes
     # is populated https://github.com/PyGithub/PyGithub/issues/1943

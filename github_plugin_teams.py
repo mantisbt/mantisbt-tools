@@ -24,7 +24,8 @@ def retrieve_org_repos(org):
     """
     repos = {}
     for repo in org.get_repos():
-        repos[repo.name] = repo
+        if repo.name != '.github':
+            repos[repo.name] = repo
     return repos
 
 

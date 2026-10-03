@@ -1,4 +1,4 @@
-#!/usr/bin/python3 -u
+#!/usr/bin/env python
 """
 Helper script for mantisbt-plugins organization maintenance
 

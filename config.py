@@ -1,4 +1,4 @@
-#!/usr/bin/python3 -u
+#!/usr/bin/env python -u
 """
 Configuration for various MantisBT utility scripts
 """

@@ -1,4 +1,4 @@
-#!/usr/bin/python3 -u
+#!/usr/bin/env python -u
 """
 Clones or updates local copies of all the specified organization's repos
 

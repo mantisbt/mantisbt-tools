@@ -1,4 +1,4 @@
-#!/usr/bin/python3 -u
+#!/usr/bin/env python -u
 """
 Retrieve a list of branches that can safely be deleted.
 

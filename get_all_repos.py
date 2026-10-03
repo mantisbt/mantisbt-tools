@@ -11,7 +11,7 @@ from pathlib import Path
 import subprocess
 
 # Github module https://github.com/jacquev6/PyGithub
-from github import Github
+from github import Github, Auth
 
 # MantisBT scripts config
 import config
@@ -31,7 +31,8 @@ def main():
     print("Retrieving all plugins from '{}' organization".format(github_org))
 
     print("Connecting to Github")
-    gh = Github(cfg.github['token'])
+    token = Auth.Token(cfg.github['token'])
+    gh = Github(auth=token)
     org = gh.get_organization(github_org)
 
     # Process all repos

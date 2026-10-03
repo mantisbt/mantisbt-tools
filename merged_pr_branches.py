@@ -18,7 +18,7 @@ from os import path
 import sys
 
 # Github module https://github.com/jacquev6/PyGithub
-from github import Github, GithubException, BadCredentialsException
+from github import Github, Auth, GithubException, BadCredentialsException
 
 # MantisBT scripts config
 from config import cfg
@@ -110,7 +110,8 @@ def main():
 
     print('Connecting to GitHub')
     global gh
-    gh = Github(cfg.github['token'])
+    token = Auth.Token(cfg.github['token'])
+    gh = Github(auth=token)
 
     # Retrieve the list of branches in the author's repository
     author_repo = get_repo(author, repo_name)

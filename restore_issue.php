@@ -12,9 +12,9 @@
  * 2. Identify the ID(s) of the issue(s) to recover, e.g.
  *    ```sql
  *    SELECT b1.id
- *    FROM production.mantis_bug_table b1
- *    LEFT JOIN backup.mantis_bug_table b2 ON b2.id = b1.id
- *    WHERE b1.id IS NULL;
+ *    FROM backup.mantis_bug_table b1
+ *    LEFT JOIN production.mantis_bug_table b2 ON b2.id = b1.id
+ *    WHERE b2.id IS NULL;
  *    ```
  *
  * 3. Set up a temporary MantisBT instance

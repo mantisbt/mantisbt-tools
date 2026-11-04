@@ -12,9 +12,9 @@
  * 2. Identify the ID(s) of the issue(s) to recover, e.g.
  *    ```sql
  *    SELECT b1.id
- *    FROM production.mantis_bug_table b1
- *    LEFT JOIN backup.mantis_bug_table b2 ON b2.id = b1.id
- *    WHERE b1.id IS NULL;
+ *    FROM backup.mantis_bug_table b1
+ *    LEFT JOIN production.mantis_bug_table b2 ON b2.id = b1.id
+ *    WHERE b2.id IS NULL;
  *    ```
  *
  * 3. Set up a temporary MantisBT instance
@@ -213,16 +213,23 @@ echo "Restore script saved in: $g_filename\n";
 # List attachments and sample Tarsnap command to restore them
 if( $t_attachments ) {
 	echo "WARNING: Issues with attachments - restore these to the file system manually\n";
-	$t_tarsnap = "tarsnap -x -f mantisbt_org_XXXX -C /tmp ";
+	$t_tarsnap = "tarsnap -x -f XXXX -C /tmp ";
 	foreach( $t_attachments as $t_attachment ) {
 		extract( $t_attachment, EXTR_PREFIX_ALL, 'v' );
 		$t_filename = str_replace( '/var/', '/srv/', $v_folder ) . $v_diskfile;
 		$t_tarsnap .= ltrim( $t_filename, '/' ) . ' ';
 		echo "- id: $v_id for bug $v_bug_id: $t_filename ($v_filename)\n";
 	}
-	echo "WARNING: Directory may be incorrect\n";
-	echo "Sample Tarsnap restore command, adjust as appropriate\n";
-	echo $t_tarsnap . PHP_EOL;
+	echo <<<END_MSG
+		WARNING: Directory may be incorrect
+		
+		Sample Tarsnap restore command, adjust as appropriate
+		  $t_tarsnap
+		where XXXX is the Tarsnap archive name; to get it, use
+		  tarsnap --list-archives |sort |tail -5
+		Copy restored files to the attachments dir and check ownership&permissions.
+		
+		END_MSG;
 }
 
 
